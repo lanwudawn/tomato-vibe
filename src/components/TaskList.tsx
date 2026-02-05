@@ -7,11 +7,12 @@ import { clsx } from 'clsx'
 
 interface TaskListProps {
   tasks: Task[]
-  loading?: boolean
   onAddTask: (title: string) => void
   onToggleTask: (id: string) => void
   onDeleteTask: (id: string) => void
   onUpdateTask: (id: string, updates: Partial<Task>) => void
+  activeTaskId?: string | null
+  onSelectTask?: (task: { id: string; title: string } | null) => void
 }
 
 export function TaskList({
@@ -20,6 +21,8 @@ export function TaskList({
   onToggleTask,
   onDeleteTask,
   onUpdateTask,
+  activeTaskId,
+  onSelectTask,
 }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -30,11 +33,6 @@ export function TaskList({
       onAddTask(newTaskTitle.trim())
       setNewTaskTitle('')
     }
-  }
-
-  const handleStartEdit = (task: Task) => {
-    setEditingId(task.id)
-    setEditingTitle(task.title)
   }
 
   const handleSaveEdit = (id: string) => {
@@ -88,14 +86,21 @@ export function TaskList({
           <div
             key={task.id}
             className={clsx(
-              'flex items-center gap-3 p-3 rounded-lg border transition-all',
+              'flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer',
+              activeTaskId === task.id
+                ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700',
               task.completed
-                ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-700'
+                ? 'opacity-60'
+                : ''
             )}
+            onClick={() => onSelectTask?.({ id: task.id, title: task.title })}
           >
             <button
-              onClick={() => onToggleTask(task.id)}
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleTask(task.id)
+              }}
               className={clsx(
                 'flex-shrink-0 transition-colors',
                 task.completed ? 'text-green-500' : 'text-gray-400 hover:text-red-500'
@@ -111,22 +116,27 @@ export function TaskList({
                 onChange={e => setEditingTitle(e.target.value)}
                 onBlur={() => handleSaveEdit(task.id)}
                 onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
                 autoFocus
                 className="flex-1 px-2 py-1 rounded border border-gray-300 dark:border-gray-600
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white outline-none"
               />
             ) : (
-              <span
-                onClick={() => handleStartEdit(task)}
-                className={clsx(
-                  'flex-1 cursor-text',
-                  task.completed
-                    ? 'text-gray-400 line-through'
-                    : 'text-gray-900 dark:text-white'
+              <div className="flex items-center gap-2 flex-1">
+                {activeTaskId === task.id && (
+                  <span className="text-red-500">▶</span>
                 )}
-              >
-                {task.title}
-              </span>
+                <span
+                  className={clsx(
+                    'flex-1 cursor-text',
+                    task.completed
+                      ? 'text-gray-400 line-through'
+                      : 'text-gray-900 dark:text-white'
+                  )}
+                >
+                  {task.title}
+                </span>
+              </div>
             )}
 
             <div className="flex items-center gap-2 text-sm text-gray-500">

@@ -17,6 +17,12 @@ import { saveSession } from '@/lib/supabase/sessions'
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
   const { settings, updateSettings, resetToDefaults } = usePomodoroSettings()
+
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [isDark, setIsDark] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+  const [activeTask, setActiveTask] = useState<{ id: string; title: string } | null>(null)
+
   const {
     mode,
     timeLeft,
@@ -30,23 +36,24 @@ function PomodoroApp() {
     focusDuration: settings.focusDuration,
     shortBreakDuration: settings.shortBreakDuration,
     longBreakDuration: settings.longBreakDuration,
-    onSessionComplete: async (sessionMode, duration) => {
+    onSessionComplete: async (sessionMode, duration, taskId) => {
       if (user) {
         await saveSession({ mode: sessionMode, duration })
       }
+      if (sessionMode === 'focus' && taskId) {
+        const task = tasks.find(t => t.id === taskId)
+        if (task) {
+          const newCount = (task.completed_pomodoros || 0) + 1
+          await handleUpdateTask(taskId, { completed_pomodoros: newCount })
+        }
+      }
     },
+    taskId: activeTask?.id,
   })
 
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [isDark, setIsDark] = useState(false)
-  const [showAuth, setShowAuth] = useState(false)
-  const [loadingTasks, setLoadingTasks] = useState(false)
-
   const loadTasks = useCallback(async () => {
-    setLoadingTasks(true)
     const data = await getTasks()
     setTasks(data)
-    setLoadingTasks(false)
   }, [])
 
   useEffect(() => {
@@ -240,6 +247,7 @@ function PomodoroApp() {
                 progress={progress()}
                 onToggle={toggle}
                 onReset={resetTimer}
+                activeTask={activeTask}
               />
             </div>
           </section>
@@ -250,11 +258,12 @@ function PomodoroApp() {
             </h2>
             <TaskList
               tasks={tasks}
-              loading={loadingTasks}
               onAddTask={handleAddTask}
               onToggleTask={handleToggleTask}
               onDeleteTask={handleDeleteTask}
               onUpdateTask={handleUpdateTask}
+              activeTaskId={activeTask?.id}
+              onSelectTask={setActiveTask}
             />
           </section>
         </main>

@@ -11,6 +11,7 @@ interface TimerDisplayProps {
   progress: number
   onToggle: () => void
   onReset: () => void
+  activeTask?: { id: string; title: string } | null
 }
 
 export function TimerDisplay({
@@ -20,6 +21,7 @@ export function TimerDisplay({
   progress,
   onToggle,
   onReset,
+  activeTask,
 }: TimerDisplayProps) {
   const modeColors = {
     focus: 'text-red-500',
@@ -35,6 +37,14 @@ export function TimerDisplay({
 
   return (
     <div className="flex flex-col items-center gap-8">
+      {activeTask && mode === 'focus' && (
+        <div className="text-center">
+          <span className="text-sm text-gray-500 dark:text-gray-400">正在进行</span>
+          <p className="text-lg font-medium text-gray-900 dark:text-white mt-1">
+            {activeTask.title}
+          </p>
+        </div>
+      )}
       <div className="text-center">
         <h2 className={clsx('text-2xl font-medium mb-2', modeColors[mode])}>
           {modeLabels[mode]}

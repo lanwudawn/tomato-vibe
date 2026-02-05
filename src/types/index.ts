@@ -36,3 +36,8 @@ export interface User {
   email: string
   created_at: string
 }
+
+export interface ActiveTaskState {
+  taskId: string | null
+  taskTitle: string | null
+}

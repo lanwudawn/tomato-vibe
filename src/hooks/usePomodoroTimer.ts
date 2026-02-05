@@ -13,7 +13,8 @@ interface UsePomodoroTimerProps {
   focusDuration: number
   shortBreakDuration: number
   longBreakDuration: number
-  onSessionComplete?: (mode: PomodoroMode, duration: number) => void
+  onSessionComplete?: (mode: PomodoroMode, duration: number, taskId?: string) => void
+  taskId?: string | null
 }
 
 export function usePomodoroTimer({
@@ -21,6 +22,7 @@ export function usePomodoroTimer({
   shortBreakDuration,
   longBreakDuration,
   onSessionComplete,
+  taskId,
 }: UsePomodoroTimerProps) {
   const [mode, setMode] = useState<PomodoroMode>('focus')
   const [timeLeft, setTimeLeft] = useState(focusDuration * 60)
@@ -55,10 +57,10 @@ export function usePomodoroTimer({
         intervalRef.current = null
       }
       const actualDuration = elapsed
-      onSessionComplete?.(mode, actualDuration)
+      onSessionComplete?.(mode, actualDuration, taskId || undefined)
       setCompletedSessions(prev => prev + 1)
     }
-  }, [mode, isRunning, getDurationForMode, onSessionComplete])
+  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId])
 
   useEffect(() => {
     if (isRunning && startTimeRef.current) {
