@@ -97,3 +97,7 @@ CREATE TRIGGER on_auth_user_created
 -- Enable Realtime for tables (optional)
 ALTER PUBLICATION supabase_realtime ADD TABLE public.tasks;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.pomodoro_sessions;
+
+-- Enable Realtime broadcast (RLS policies for broadcast)
+-- Note: Broadcast channels don't require database tables, but users must be authenticated
+-- Create a custom function to validate broadcast permissions if needed

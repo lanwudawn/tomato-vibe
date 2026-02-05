@@ -1,0 +1,24 @@
+[package]
+name = "tomato-widget"
+version = "1.0.0"
+description = "Tomato Pomodoro Timer Desktop Widget"
+authors = ["you"]
+edition = "2021"
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "window-all"] }
+tauri-plugin-shell = { version = "2", features = ["open"] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "z"
+strip = true

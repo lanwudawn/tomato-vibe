@@ -13,6 +13,7 @@ import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History } from 'lucide-
 import Link from 'next/link'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
+import { broadcastTimerState, broadcastSessionComplete, getStoredUserId } from '@/lib/supabase/broadcast'
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -41,6 +42,7 @@ function PomodoroApp() {
       if (user) {
         await saveSession({ mode: sessionMode, duration })
       }
+      await broadcastSessionComplete(sessionMode, duration, taskId)
       if (sessionMode === 'focus' && taskId) {
         const task = tasks.find(t => t.id === taskId)
         if (task) {
@@ -51,6 +53,10 @@ function PomodoroApp() {
     },
     taskId: activeTask?.id,
   })
+
+  useEffect(() => {
+    broadcastTimerState(mode, timeLeft, isRunning, activeTask, completedSessions)
+  }, [mode, timeLeft, isRunning, activeTask, completedSessions])
 
   const loadTasks = useCallback(async () => {
     const data = await getTasks()
