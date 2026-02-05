@@ -205,19 +205,38 @@ export function TaskList({
       </DragDropContext>
 
       {tasks.length === 0 && (
-        <div className="text-center py-8">
-          <div className="flex flex-col items-center gap-4 text-gray-500 dark:text-gray-400">
-            <Lightbulb size={48} className="text-yellow-500" />
-            <p>还没有任务，添加一个开始吧！</p>
-            <button
-              onClick={addExampleTask}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/30
-                         text-yellow-700 dark:text-yellow-400 font-medium hover:bg-yellow-200
-                         dark:hover:bg-yellow-900/50 transition-colors"
-            >
-              <Lightbulb size={18} />
-              添加示例任务：阅读 25 分钟
-            </button>
+        <div className="text-center py-10">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 flex items-center justify-center animate-pulse">
+                <Lightbulb size={40} className="text-yellow-500" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                1
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                开始你的专注之旅 🚀
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto">
+                番茄钟帮你进入心流状态，每一次专注都是成长的积累。
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 mt-2">
+              <button
+                onClick={addExampleTask}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-red-500 to-red-600
+                           text-white font-medium hover:from-red-600 hover:to-red-700 transition-all
+                           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                <span>✨</span>
+                <span>添加示例：阅读 25 分钟</span>
+              </button>
+              <p className="text-xs text-gray-400">
+                或者直接在输入框中输入你的任务
+              </p>
+            </div>
           </div>
         </div>
       )}
