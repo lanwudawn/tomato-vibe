@@ -7,6 +7,7 @@ import { clsx } from 'clsx'
 
 interface TaskListProps {
   tasks: Task[]
+  loading?: boolean
   onAddTask: (title: string) => void
   onToggleTask: (id: string) => void
   onDeleteTask: (id: string) => void
@@ -15,6 +16,7 @@ interface TaskListProps {
 
 export function TaskList({
   tasks,
+  loading = false,
   onAddTask,
   onToggleTask,
   onDeleteTask,

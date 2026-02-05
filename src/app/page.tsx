@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { usePomodoroTimer, usePomodoroSettings } from '@/hooks'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ModeSelector } from '@/components/ModeSelector'
@@ -11,6 +11,8 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { Task } from '@/types'
 import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History } from 'lucide-react'
 import Link from 'next/link'
+import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
+import { saveSession } from '@/lib/supabase/sessions'
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -28,11 +30,17 @@ function PomodoroApp() {
     focusDuration: settings.focusDuration,
     shortBreakDuration: settings.shortBreakDuration,
     longBreakDuration: settings.longBreakDuration,
+    onSessionComplete: async (sessionMode, duration) => {
+      if (user) {
+        await saveSession({ mode: sessionMode, duration })
+      }
+    },
   })
 
   const [tasks, setTasks] = useState<Task[]>([])
   const [isDark, setIsDark] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
+  const [loadingTasks, setLoadingTasks] = useState(false)
 
   useEffect(() => {
     if (isDark) {
@@ -42,8 +50,23 @@ function PomodoroApp() {
     }
   }, [isDark])
 
-  const handleAddTask = (title: string) => {
-    const newTask: Task = {
+  useEffect(() => {
+    if (user) {
+      loadTasks()
+    } else {
+      setTasks([])
+    }
+  }, [user])
+
+  const loadTasks = useCallback(async () => {
+    setLoadingTasks(true)
+    const data = await getTasks()
+    setTasks(data)
+    setLoadingTasks(false)
+  }, [])
+
+  const handleAddTask = async (title: string) => {
+    const tempTask: Task = {
       id: crypto.randomUUID(),
       user_id: user?.id || 'demo-user',
       title,
@@ -52,27 +75,49 @@ function PomodoroApp() {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
-    setTasks(prev => [newTask, ...prev])
+    setTasks(prev => [tempTask, ...prev])
+
+    if (user) {
+      const savedTask = await saveTaskToDB({ title })
+      if (savedTask) {
+        setTasks(prev => prev.map(t => t.id === tempTask.id ? savedTask : t))
+      }
+    }
   }
 
-  const handleToggleTask = (id: string) => {
+  const handleToggleTask = async (id: string) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+
     setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? { ...task, completed: !task.completed } : task
+      prev.map(t =>
+        t.id === id ? { ...t, completed: !t.completed } : t
       )
     )
+
+    if (user) {
+      await updateTaskInDB(id, { completed: !task.completed })
+    }
   }
 
-  const handleDeleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id))
+  const handleDeleteTask = async (id: string) => {
+    setTasks(prev => prev.filter(t => t.id !== id))
+
+    if (user) {
+      await deleteTaskFromDB(id)
+    }
   }
 
-  const handleUpdateTask = (id: string, updates: Partial<Task>) => {
+  const handleUpdateTask = async (id: string, updates: Partial<Task>) => {
     setTasks(prev =>
-      prev.map(task =>
-        task.id === id ? { ...task, ...updates, updated_at: new Date().toISOString() } : task
+      prev.map(t =>
+        t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
       )
     )
+
+    if (user) {
+      await updateTaskInDB(id, updates)
+    }
   }
 
   if (authLoading) {
@@ -177,6 +222,7 @@ function PomodoroApp() {
             </h2>
             <TaskList
               tasks={tasks}
+              loading={loadingTasks}
               onAddTask={handleAddTask}
               onToggleTask={handleToggleTask}
               onDeleteTask={handleDeleteTask}
