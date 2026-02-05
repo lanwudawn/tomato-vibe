@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { PomodoroMode } from '@/types'
 
+export function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
 interface UsePomodoroTimerProps {
   focusDuration: number
   shortBreakDuration: number
@@ -21,7 +27,7 @@ export function usePomodoroTimer({
   const [isRunning, setIsRunning] = useState(false)
   const [completedSessions, setCompletedSessions] = useState(0)
   const startTimeRef = useRef<number | null>(null)
-  const animationFrameRef = useRef<number | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const getDurationForMode = useCallback((currentMode: PomodoroMode) => {
     switch (currentMode) {
@@ -44,28 +50,32 @@ export function usePomodoroTimer({
 
     if (remaining <= 0) {
       setIsRunning(false)
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
       const actualDuration = elapsed
       onSessionComplete?.(mode, actualDuration)
       setCompletedSessions(prev => prev + 1)
-    } else {
-      animationFrameRef.current = requestAnimationFrame(updateTimeLeft)
     }
   }, [mode, isRunning, getDurationForMode, onSessionComplete])
 
   useEffect(() => {
     if (isRunning && startTimeRef.current) {
-      animationFrameRef.current = requestAnimationFrame(updateTimeLeft)
+      intervalRef.current = setInterval(updateTimeLeft, 1000)
     }
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
     }
   }, [isRunning, updateTimeLeft])
 
   const resetTimer = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
     startTimeRef.current = null
     setTimeLeft(getDurationForMode(mode))
@@ -73,8 +83,9 @@ export function usePomodoroTimer({
   }, [mode, getDurationForMode])
 
   const switchMode = useCallback((newMode: PomodoroMode) => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
     startTimeRef.current = null
     setMode(newMode)
@@ -100,12 +111,6 @@ export function usePomodoroTimer({
       start()
     }
   }, [isRunning, start, pause])
-
-  const formatTime = useCallback((seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }, [])
 
   const progress = useCallback(() => {
     const total = getDurationForMode(mode)

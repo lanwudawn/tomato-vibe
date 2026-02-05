@@ -2,6 +2,7 @@
 
 import { Play, Pause, RotateCcw } from 'lucide-react'
 import { clsx } from 'clsx'
+import { formatTime } from '@/hooks/usePomodoroTimer'
 
 interface TimerDisplayProps {
   timeLeft: number
@@ -20,12 +21,6 @@ export function TimerDisplay({
   onToggle,
   onReset,
 }: TimerDisplayProps) {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-
   const modeColors = {
     focus: 'text-red-500',
     shortBreak: 'text-green-500',

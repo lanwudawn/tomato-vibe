@@ -42,6 +42,13 @@ function PomodoroApp() {
   const [showAuth, setShowAuth] = useState(false)
   const [loadingTasks, setLoadingTasks] = useState(false)
 
+  const loadTasks = useCallback(async () => {
+    setLoadingTasks(true)
+    const data = await getTasks()
+    setTasks(data)
+    setLoadingTasks(false)
+  }, [])
+
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark')
@@ -52,22 +59,22 @@ function PomodoroApp() {
 
   useEffect(() => {
     if (user) {
-      loadTasks()
+      const timeoutId = setTimeout(() => {
+        loadTasks()
+      }, 0)
+      return () => clearTimeout(timeoutId)
     } else {
-      setTasks([])
+      const timeoutId = setTimeout(() => {
+        setTasks([])
+      }, 0)
+      return () => clearTimeout(timeoutId)
     }
-  }, [user])
-
-  const loadTasks = useCallback(async () => {
-    setLoadingTasks(true)
-    const data = await getTasks()
-    setTasks(data)
-    setLoadingTasks(false)
-  }, [])
+  }, [user, loadTasks])
 
   const handleAddTask = async (title: string) => {
+    const tempTaskId = crypto.randomUUID()
     const tempTask: Task = {
-      id: crypto.randomUUID(),
+      id: tempTaskId,
       user_id: user?.id || 'demo-user',
       title,
       completed_pomodoros: 0,
@@ -80,7 +87,9 @@ function PomodoroApp() {
     if (user) {
       const savedTask = await saveTaskToDB({ title })
       if (savedTask) {
-        setTasks(prev => prev.map(t => t.id === tempTask.id ? savedTask : t))
+        setTasks(prev => prev.map(t => t.id === tempTaskId ? savedTask : t))
+      } else {
+        setTasks(prev => prev.filter(t => t.id !== tempTaskId))
       }
     }
   }
@@ -89,6 +98,7 @@ function PomodoroApp() {
     const task = tasks.find(t => t.id === id)
     if (!task) return
 
+    const previousCompleted = task.completed
     setTasks(prev =>
       prev.map(t =>
         t.id === id ? { ...t, completed: !t.completed } : t
@@ -96,19 +106,34 @@ function PomodoroApp() {
     )
 
     if (user) {
-      await updateTaskInDB(id, { completed: !task.completed })
+      const success = await updateTaskInDB(id, { completed: !previousCompleted })
+      if (!success) {
+        setTasks(prev =>
+          prev.map(t =>
+            t.id === id ? { ...t, completed: previousCompleted } : t
+          )
+        )
+      }
     }
   }
 
   const handleDeleteTask = async (id: string) => {
+    const taskToDelete = tasks.find(t => t.id === id)
     setTasks(prev => prev.filter(t => t.id !== id))
 
-    if (user) {
-      await deleteTaskFromDB(id)
+    if (user && taskToDelete) {
+      const success = await deleteTaskFromDB(id)
+      if (!success) {
+        setTasks(prev => [...prev, taskToDelete])
+      }
     }
   }
 
   const handleUpdateTask = async (id: string, updates: Partial<Task>) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+
+    const previousTask = { ...task }
     setTasks(prev =>
       prev.map(t =>
         t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t
@@ -116,7 +141,10 @@ function PomodoroApp() {
     )
 
     if (user) {
-      await updateTaskInDB(id, updates)
+      const success = await updateTaskInDB(id, updates)
+      if (!success) {
+        setTasks(prev => prev.map(t => t.id === id ? previousTask : t))
+      }
     }
   }
 

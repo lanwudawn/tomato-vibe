@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { Mail, Lock, ArrowRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { clsx } from 'clsx'
 
 interface AuthFormProps {
   onSuccess?: () => void

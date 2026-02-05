@@ -16,7 +16,6 @@ interface TaskListProps {
 
 export function TaskList({
   tasks,
-  loading = false,
   onAddTask,
   onToggleTask,
   onDeleteTask,

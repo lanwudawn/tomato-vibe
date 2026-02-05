@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PomodoroSettings } from '@/types'
 
 const DEFAULT_SETTINGS: PomodoroSettings = {
@@ -10,36 +10,48 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   sessionsBeforeLongBreak: 4,
 }
 
-export function usePomodoroSettings() {
-  const [settings, setSettings] = useState<PomodoroSettings>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('pomodoroSettings')
-      if (saved) {
-        try {
-          return JSON.parse(saved)
-        } catch {
-          return DEFAULT_SETTINGS
-        }
-      }
+function getInitialSettings(): PomodoroSettings {
+  if (typeof window === 'undefined') return DEFAULT_SETTINGS
+  const saved = localStorage.getItem('pomodoroSettings')
+  if (saved) {
+    try {
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
+    } catch {
+      console.error('Failed to parse settings from localStorage')
     }
-    return DEFAULT_SETTINGS
-  })
+  }
+  return DEFAULT_SETTINGS
+}
+
+export function usePomodoroSettings() {
+  const [settings, setSettings] = useState<PomodoroSettings>(getInitialSettings)
+  const [isLoaded, setIsLoaded] = useState(false)
 
   useEffect(() => {
-    localStorage.setItem('pomodoroSettings', JSON.stringify(settings))
-  }, [settings])
+    const timeoutId = setTimeout(() => {
+      setIsLoaded(true)
+    }, 0)
+    return () => clearTimeout(timeoutId)
+  }, [])
 
-  const updateSettings = (newSettings: Partial<PomodoroSettings>) => {
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('pomodoroSettings', JSON.stringify(settings))
+    }
+  }, [settings, isLoaded])
+
+  const updateSettings = useCallback((newSettings: Partial<PomodoroSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }))
-  }
+  }, [])
 
-  const resetToDefaults = () => {
+  const resetToDefaults = useCallback(() => {
     setSettings(DEFAULT_SETTINGS)
-  }
+  }, [])
 
   return {
     settings,
     updateSettings,
     resetToDefaults,
+    isLoaded,
   }
 }
