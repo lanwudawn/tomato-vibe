@@ -1,0 +1,38 @@
+export type PomodoroMode = 'focus' | 'shortBreak' | 'longBreak'
+
+export interface PomodoroSettings {
+  focusDuration: number // minutes
+  shortBreakDuration: number // minutes
+  longBreakDuration: number // minutes
+  sessionsBeforeLongBreak: number
+}
+
+export interface PomodoroSession {
+  id: string
+  user_id: string
+  task_id?: string
+  mode: PomodoroMode
+  duration: number // seconds
+  completed: boolean
+  started_at: string
+  completed_at?: string
+  created_at: string
+}
+
+export interface Task {
+  id: string
+  user_id: string
+  title: string
+  description?: string
+  estimated_pomodoros?: number
+  completed_pomodoros: number
+  completed: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface User {
+  id: string
+  email: string
+  created_at: string
+}
