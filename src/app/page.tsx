@@ -32,6 +32,7 @@ function PomodoroApp() {
     resetTimer,
     switchMode,
     progress,
+    setTimeLeft,
   } = usePomodoroTimer({
     focusDuration: settings.focusDuration,
     shortBreakDuration: settings.shortBreakDuration,
@@ -155,6 +156,50 @@ function PomodoroApp() {
     }
   }
 
+  const handleReorderTasks = useCallback((reorderedTasks: Task[]) => {
+    setTasks(reorderedTasks)
+
+    if (user) {
+      const updates = reorderedTasks.map((task, index) =>
+        updateTaskInDB(task.id, { order: index })
+      )
+      Promise.allSettled(updates)
+    } else {
+      localStorage.setItem('taskOrder', JSON.stringify(reorderedTasks.map(t => t.id)))
+    }
+  }, [user])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault()
+          toggle()
+          break
+        case 'r':
+        case 'R':
+          resetTimer()
+          break
+        case '+':
+        case '=':
+          if (mode === 'focus' && timeLeft < settings.focusDuration * 60 + 60 * 30) {
+            setTimeLeft((prev: number) => Math.min(prev + 300, settings.focusDuration * 60 + 60 * 30))
+          }
+          break
+        case '-':
+          if (mode === 'focus' && timeLeft > 60) {
+            setTimeLeft((prev: number) => Math.max(prev - 300, 60))
+          }
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [toggle, resetTimer, mode, timeLeft, settings.focusDuration, setTimeLeft])
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -173,44 +218,44 @@ function PomodoroApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+        <header className="flex flex-wrap justify-between items-center gap-4 mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             🍅 番茄钟
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
             {user ? (
               <>
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                  <UserIcon size={18} />
-                  <span className="text-sm">{user.email}</span>
+                <div className="flex items-center gap-1 sm:gap-2 text-gray-600 dark:text-gray-400">
+                  <UserIcon size={16} />
+                  <span className="text-xs sm:text-sm hidden sm:inline">{user.email}</span>
                 </div>
                 <Link
                   href="/stats"
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                              hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <BarChart2 size={18} />
+                  <BarChart2 size={16} />
                 </Link>
                 <Link
                   href="/history"
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                              hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <History size={18} />
+                  <History size={16} />
                 </Link>
                 <button
                   onClick={signOut}
-                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                              hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                 </button>
               </>
             ) : (
               <button
                 onClick={() => setShowAuth(true)}
-                className="px-4 py-2 rounded-lg bg-red-500 text-white font-medium
+                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-red-500 text-white font-medium text-sm sm:text-base
                            hover:bg-red-600 transition-colors"
               >
                 登录 / 注册
@@ -223,10 +268,10 @@ function PomodoroApp() {
             />
             <button
               onClick={() => setIsDark(!isDark)}
-              className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+              className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                          hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           </div>
         </header>
@@ -238,6 +283,7 @@ function PomodoroApp() {
               onModeChange={switchMode}
               sessionsCompleted={completedSessions}
               sessionsBeforeLongBreak={settings.sessionsBeforeLongBreak}
+              isRunning={isRunning}
             />
             <div className="mt-8">
               <TimerDisplay
@@ -248,6 +294,11 @@ function PomodoroApp() {
                 onToggle={toggle}
                 onReset={resetTimer}
                 activeTask={activeTask}
+                onAdjustTime={(delta) => {
+                  if (mode === 'focus') {
+                    setTimeLeft(prev => Math.max(60, Math.min(3600, prev + delta)))
+                  }
+                }}
               />
             </div>
           </section>
@@ -262,6 +313,7 @@ function PomodoroApp() {
               onToggleTask={handleToggleTask}
               onDeleteTask={handleDeleteTask}
               onUpdateTask={handleUpdateTask}
+              onReorderTasks={handleReorderTasks}
               activeTaskId={activeTask?.id}
               onSelectTask={setActiveTask}
             />

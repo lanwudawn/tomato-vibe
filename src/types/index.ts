@@ -27,6 +27,7 @@ export interface Task {
   estimated_pomodoros?: number
   completed_pomodoros: number
   completed: boolean
+  order?: number
   created_at: string
   updated_at: string
 }

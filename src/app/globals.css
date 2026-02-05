@@ -33,3 +33,38 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   opacity: 1;
 }
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .task-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .timer-circle {
+    width: 16rem;
+    height: 16rem;
+  }
+
+  .mode-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .control-button {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+  }
+
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .header-button {
+    padding: 0.5rem;
+  }
+}

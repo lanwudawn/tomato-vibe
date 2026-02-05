@@ -9,6 +9,33 @@ export function formatTime(seconds: number): string {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
+const modeLabels: Record<PomodoroMode, string> = {
+  focus: '专注中',
+  shortBreak: '短休息',
+  longBreak: '长休息',
+}
+
+function playCompletionSound(): void {
+  if (typeof window === 'undefined') return
+  try {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    if (!AudioContextClass) return
+    const ctx = new AudioContextClass()
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.frequency.value = 800
+    osc.type = 'sine'
+    gain.gain.setValueAtTime(0.3, ctx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start()
+    osc.stop(ctx.currentTime + 0.3)
+  } catch {
+    console.error('Failed to play completion sound')
+  }
+}
+
 interface UsePomodoroTimerProps {
   focusDuration: number
   shortBreakDuration: number
@@ -57,6 +84,7 @@ export function usePomodoroTimer({
         intervalRef.current = null
       }
       const actualDuration = elapsed
+      playCompletionSound()
       onSessionComplete?.(mode, actualDuration, taskId || undefined)
       setCompletedSessions(prev => prev + 1)
     }
@@ -73,6 +101,17 @@ export function usePomodoroTimer({
       }
     }
   }, [isRunning, updateTimeLeft])
+
+  useEffect(() => {
+    if (isRunning) {
+      document.title = `(${formatTime(timeLeft)}) ${modeLabels[mode]} - 番茄钟`
+    } else {
+      document.title = '番茄钟'
+    }
+    return () => {
+      document.title = '番茄钟'
+    }
+  }, [timeLeft, isRunning, mode])
 
   const resetTimer = useCallback(() => {
     if (intervalRef.current) {
@@ -131,5 +170,6 @@ export function usePomodoroTimer({
     switchMode,
     formatTime,
     progress,
+    setTimeLeft,
   }
 }
