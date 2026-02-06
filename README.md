@@ -3,7 +3,7 @@
 > **极简、优雅、沉浸的番茄工作法助手。**  
 > 别具一格的视觉体验，让每一次专注都充满仪式感。
 
-[**🌍 立即体验 (Vercel)**](https://tomato-vibe.vercel.app/)
+[**🌍 立即体验 (Vercel)**](https://tomato-vibe-two.vercel.app/)
 
 ---
 
