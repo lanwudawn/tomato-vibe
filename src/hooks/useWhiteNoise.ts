@@ -6,7 +6,7 @@ export type WhiteNoiseType = 'none' | 'rain' | 'forest' | 'cafe'
 
 const NOISE_URLS: Record<Exclude<WhiteNoiseType, 'none'>, string> = {
     rain: 'https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg',
-    forest: 'https://actions.google.com/sounds/v1/ambiences/forest_morning_birds_chirping.ogg',
+    forest: 'https://actions.google.com/sounds/v1/ambiences/spring_day_forest.ogg',
     cafe: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg',
 }
 
