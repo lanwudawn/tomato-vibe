@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Trash2, Check, Circle, GripVertical, Lightbulb } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Plus, Lightbulb } from 'lucide-react'
 import { Task } from '@/types'
-import { clsx } from 'clsx'
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+import { TaskItem } from './TaskItem'
 
 interface TaskListProps {
   tasks: Task[]
@@ -29,7 +29,6 @@ export function TaskList({
 }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingTitle, setEditingTitle] = useState('')
 
   const handleAddTask = () => {
     if (newTaskTitle.trim()) {
@@ -38,25 +37,24 @@ export function TaskList({
     }
   }
 
-  const handleSaveEdit = (id: string) => {
-    if (editingTitle.trim()) {
-      onUpdateTask(id, { title: editingTitle.trim() })
+  const handleSaveEdit = useCallback((id: string, newTitle: string) => {
+    if (newTitle.trim()) {
+      onUpdateTask(id, { title: newTitle.trim() })
     }
     setEditingId(null)
-    setEditingTitle('')
-  }
+  }, [onUpdateTask])
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingId(null)
+  }, [])
+
+  const handleStartEdit = useCallback((id: string) => {
+    setEditingId(id)
+  }, [])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (editingId) {
-        handleSaveEdit(editingId)
-      } else {
-        handleAddTask()
-      }
-    }
-    if (e.key === 'Escape' && editingId) {
-      setEditingId(null)
-      setEditingTitle('')
+      handleAddTask()
     }
   }
 
@@ -112,91 +110,19 @@ export function TaskList({
               className="space-y-2"
             >
               {tasks.map((task, index) => (
-                <Draggable key={task.id} draggableId={task.id} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={clsx(
-                        'flex items-center gap-3 p-3 rounded-lg border transition-all',
-                        activeTaskId === task.id
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
-                        task.completed
-                          ? 'opacity-60'
-                          : '',
-                        snapshot.isDragging && 'shadow-lg ring-2 ring-red-500'
-                      )}
-                      onClick={() => onSelectTask?.({ id: task.id, title: task.title })}
-                    >
-                      <div
-                        {...provided.dragHandleProps}
-                        className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
-                      >
-                        <GripVertical size={18} />
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onToggleTask(task.id)
-                        }}
-                        className={clsx(
-                          'flex-shrink-0 transition-colors',
-                          task.completed ? 'text-green-500' : 'text-gray-400 hover:text-red-500'
-                        )}
-                      >
-                        {task.completed ? <Check size={20} /> : <Circle size={20} />}
-                      </button>
-
-                      {editingId === task.id ? (
-                        <input
-                          type="text"
-                          value={editingTitle}
-                          onChange={e => setEditingTitle(e.target.value)}
-                          onBlur={() => handleSaveEdit(task.id)}
-                          onKeyDown={handleKeyDown}
-                          onClick={(e) => e.stopPropagation()}
-                          autoFocus
-                          className="flex-1 px-2 py-1 rounded border border-gray-300 dark:border-gray-600
-                                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white outline-none"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {activeTaskId === task.id && (
-                            <span className="text-red-500 flex-shrink-0">▶</span>
-                          )}
-                          <span
-                            className={clsx(
-                              'flex-1 cursor-text truncate',
-                              task.completed
-                                ? 'text-gray-400 line-through'
-                                : 'text-gray-900 dark:text-white'
-                            )}
-                          >
-                            {task.title}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2 text-sm text-gray-500 flex-shrink-0">
-                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
-                          {task.completed_pomodoros}/{task.estimated_pomodoros || '∞'}
-                        </span>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          onDeleteTask(task.id)
-                        }}
-                        className="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  )}
-                </Draggable>
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  index={index}
+                  isActive={activeTaskId === task.id}
+                  isEditing={editingId === task.id}
+                  onToggle={onToggleTask}
+                  onDelete={onDeleteTask}
+                  onSelect={(t) => onSelectTask?.(t)}
+                  onEditSave={handleSaveEdit}
+                  onEditCancel={handleCancelEdit}
+                  onEditStart={handleStartEdit}
+                />
               ))}
               {provided.placeholder}
             </div>

@@ -16,6 +16,18 @@ interface TimerDisplayProps {
   onAdjustTime?: (delta: number) => void
 }
 
+const modeColors = {
+  focus: 'text-red-500',
+  shortBreak: 'text-green-500',
+  longBreak: 'text-blue-500',
+}
+
+const modeLabels = {
+  focus: '专注时间',
+  shortBreak: '短休息',
+  longBreak: '长休息',
+}
+
 export function TimerDisplay({
   timeLeft,
   isRunning,
@@ -35,18 +47,6 @@ export function TimerDisplay({
       setCircumference(2 * Math.PI * r)
     }
   }, [])
-
-  const modeColors = {
-    focus: 'text-red-500',
-    shortBreak: 'text-green-500',
-    longBreak: 'text-blue-500',
-  }
-
-  const modeLabels = {
-    focus: '专注时间',
-    shortBreak: '短休息',
-    longBreak: '长休息',
-  }
 
   const handleAdjustTime = (delta: number) => {
     onAdjustTime?.(delta)
