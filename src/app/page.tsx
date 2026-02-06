@@ -14,6 +14,8 @@ import Link from 'next/link'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
 import { broadcastTimerState, broadcastSessionComplete, getStoredUserId } from '@/lib/supabase/broadcast'
+import { WebWidget } from '@/components/WebWidget'
+import { Layers } from 'lucide-react'
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -23,6 +25,7 @@ function PomodoroApp() {
   const [isDark, setIsDark] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [activeTask, setActiveTask] = useState<{ id: string; title: string } | null>(null)
+  const [showWidget, setShowWidget] = useState(false)
 
   const {
     mode,
@@ -273,6 +276,16 @@ function PomodoroApp() {
               onReset={resetToDefaults}
             />
             <button
+              onClick={() => setShowWidget(!showWidget)}
+              className={`p-1.5 sm:p-2 rounded-full transition-colors ${
+                showWidget 
+                  ? 'bg-red-100 text-red-600' 
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Layers size={18} />
+            </button>
+            <button
               onClick={() => setIsDark(!isDark)}
               className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                          hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -282,6 +295,7 @@ function PomodoroApp() {
           </div>
         </header>
 
+        <WebWidget isOpen={showWidget} onClose={() => setShowWidget(false)} />
         <main className="space-y-12">
           <section className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8">
             <ModeSelector
