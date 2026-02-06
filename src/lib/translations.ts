@@ -139,6 +139,7 @@ export const translations = {
         // History
         historyTitle: "History",
         noHistory: "No focus sessions yet, start focusing!",
+        toggleTheme: "Toggle Theme",
     },
     zh: {
         // Common
@@ -278,5 +279,6 @@ export const translations = {
         // History
         historyTitle: "历史记录",
         noHistory: "还没有完成任何洋柿子氛围，开始专注吧！",
+        toggleTheme: "日间夜间切换",
     }
 };

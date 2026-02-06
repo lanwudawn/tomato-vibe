@@ -23,6 +23,7 @@ export function SettingsPanel({
         onClick={() => setIsOpen(true)}
         className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                    hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        title={t('settings')}
       >
         <Settings size={20} />
       </button>
@@ -57,8 +58,8 @@ export function SettingsPanel({
                   <button
                     onClick={() => setLanguage('en')}
                     className={`flex-1 py-2 px-4 rounded-lg border ${language === 'en'
-                        ? 'bg-tomato text-white border-tomato'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      ? 'bg-tomato text-white border-tomato'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                       } transition-colors`}
                   >
                     English
@@ -66,8 +67,8 @@ export function SettingsPanel({
                   <button
                     onClick={() => setLanguage('zh')}
                     className={`flex-1 py-2 px-4 rounded-lg border ${language === 'zh'
-                        ? 'bg-tomato text-white border-tomato'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      ? 'bg-tomato text-white border-tomato'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                       } transition-colors`}
                   >
                     中文

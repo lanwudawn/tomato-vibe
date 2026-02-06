@@ -292,24 +292,27 @@ function PomodoroApp() {
                     <UserIcon size={16} />
                     <span className="text-sm hidden sm:inline">{user.email}</span>
                   </div>
+                  <button
+                    onClick={signOut}
+                    className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
+                    title={t('logout')}
+                  >
+                    <LogOut size={18} />
+                  </button>
                   <Link
                     href="/stats"
                     className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
+                    title={t('statsTitle')}
                   >
                     <BarChart2 size={18} />
                   </Link>
                   <Link
                     href="/history"
                     className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
+                    title={t('historyTitle')}
                   >
                     <History size={18} />
                   </Link>
-                  <button
-                    onClick={signOut}
-                    className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
-                  >
-                    <LogOut size={18} />
-                  </button>
                 </>
               ) : (
                 <button
@@ -327,6 +330,7 @@ function PomodoroApp() {
               <button
                 onClick={() => setIsDark(!isDark)}
                 className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
+                title={t('toggleTheme')}
               >
                 {isDark ? <Sun size={20} /> : <Moon size={20} />}
               </button>
