@@ -1,6 +1,6 @@
 'use client'
 
-import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react'
+import { Play, Pause, RotateCcw, Plus, Minus, BellOff } from 'lucide-react'
 import { clsx } from 'clsx'
 import { formatTime } from '@/hooks/usePomodoroTimer'
 import { useRef, useEffect, useState } from 'react'
@@ -14,6 +14,8 @@ interface TimerDisplayProps {
   onReset: () => void
   activeTask?: { id: string; title: string } | null
   onAdjustTime?: (delta: number) => void
+  isAlarmPlaying?: boolean
+  onStopAlarm?: () => void
 }
 
 const modeColors = {
@@ -37,6 +39,8 @@ export function TimerDisplay({
   onReset,
   activeTask,
   onAdjustTime,
+  isAlarmPlaying,
+  onStopAlarm,
 }: TimerDisplayProps) {
   const circleRef = useRef<SVGCircleElement>(null)
   const [circumference, setCircumference] = useState(0)
@@ -100,6 +104,16 @@ export function TimerDisplay({
             {formatTime(timeLeft)}
           </span>
         </div>
+
+        {isAlarmPlaying && (
+          <button
+            onClick={onStopAlarm}
+            className="absolute -bottom-4 animate-bounce bg-tomato text-white px-6 py-2 rounded-full font-bold shadow-xl shadow-tomato/40 flex items-center gap-2 hover:scale-110 transition-all z-20"
+          >
+            <BellOff size={18} />
+            停止闹铃
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col items-center gap-6">

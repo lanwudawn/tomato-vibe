@@ -51,9 +51,11 @@ function PomodoroApp() {
     timeLeft,
     isRunning,
     completedSessions,
+    isAlarmPlaying,
     toggle,
     resetTimer,
     switchMode,
+    stopAlarm,
     progress,
     setTimeLeft,
   } = usePomodoroTimer({
@@ -422,6 +424,8 @@ function PomodoroApp() {
               progress={progress()}
               onToggle={toggle}
               onReset={resetTimer}
+              isAlarmPlaying={isAlarmPlaying}
+              onStopAlarm={stopAlarm}
               activeTask={activeTask}
               onAdjustTime={(delta) => {
                 if (mode === 'focus') {

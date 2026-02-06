@@ -15,31 +15,15 @@ const modeLabels: Record<PomodoroMode, string> = {
   longBreak: '长休息',
 }
 
-
-const sounds = {
-  bell: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg',
-  digital: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
-  wood: 'https://actions.google.com/sounds/v1/foley/wood_hit.ogg',
-}
-
-function playCompletionSound(type: 'bell' | 'digital' | 'wood', volume: number): void {
-  if (typeof window === 'undefined') return
-
-  try {
-    const audio = new Audio(sounds[type])
-    audio.volume = volume
-
-    // Create a promise to handle the play attempt
-    const playPromise = audio.play()
-
-    if (playPromise !== undefined) {
-      playPromise.catch((error) => {
-        console.error('Audio playback failed:', error)
-      })
-    }
-  } catch (e) {
-    console.error('Failed to initialize completion sound', e)
-  }
+interface UsePomodoroTimerProps {
+  focusDuration: number
+  shortBreakDuration: number
+  longBreakDuration: number
+  onSessionComplete?: (mode: PomodoroMode, duration: number, taskId?: string) => void
+  taskId?: string | null
+  soundType?: 'bell' | 'digital' | 'wood'
+  soundVolume?: number
+  hapticsEnabled?: boolean
 }
 
 function sendNotification(mode: PomodoroMode) {
@@ -74,17 +58,6 @@ function triggerHaptics() {
   }
 }
 
-interface UsePomodoroTimerProps {
-  focusDuration: number
-  shortBreakDuration: number
-  longBreakDuration: number
-  onSessionComplete?: (mode: PomodoroMode, duration: number, taskId?: string) => void
-  taskId?: string | null
-  soundType?: 'bell' | 'digital' | 'wood'
-  soundVolume?: number
-  hapticsEnabled?: boolean
-}
-
 export function usePomodoroTimer({
   focusDuration,
   shortBreakDuration,
@@ -99,8 +72,49 @@ export function usePomodoroTimer({
   const [timeLeft, setTimeLeft] = useState(focusDuration * 60)
   const [isRunning, setIsRunning] = useState(false)
   const [completedSessions, setCompletedSessions] = useState(0)
+  const [isAlarmPlaying, setIsAlarmPlaying] = useState(false)
+
   const startTimeRef = useRef<number | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  const stopAlarm = useCallback(() => {
+    if (alarmAudioRef.current) {
+      alarmAudioRef.current.pause()
+      alarmAudioRef.current.currentTime = 0
+      alarmAudioRef.current = null
+      setIsAlarmPlaying(false)
+    }
+  }, [])
+
+  const playCompletionSound = useCallback((type: 'bell' | 'digital' | 'wood', volume: number) => {
+    if (typeof window === 'undefined') return
+
+    const sounds = {
+      bell: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg',
+      digital: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+      wood: 'https://actions.google.com/sounds/v1/foley/wood_hit.ogg',
+    }
+
+    try {
+      stopAlarm()
+      const audio = new Audio(sounds[type])
+      audio.volume = volume
+      audio.onended = () => setIsAlarmPlaying(false)
+      alarmAudioRef.current = audio
+
+      const playPromise = audio.play()
+      if (playPromise !== undefined) {
+        setIsAlarmPlaying(true)
+        playPromise.catch((error) => {
+          console.error('Audio playback failed:', error)
+          setIsAlarmPlaying(false)
+        })
+      }
+    } catch (e) {
+      console.error('Failed to initialize completion sound', e)
+    }
+  }, [stopAlarm])
 
   const getDurationForMode = useCallback((currentMode: PomodoroMode) => {
     switch (currentMode) {
@@ -135,7 +149,7 @@ export function usePomodoroTimer({
       onSessionComplete?.(mode, actualDuration, taskId || undefined)
       setCompletedSessions(prev => prev + 1)
     }
-  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId, soundType, soundVolume, hapticsEnabled])
+  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId, soundType, soundVolume, hapticsEnabled, playCompletionSound])
 
   useEffect(() => {
     if (isRunning && startTimeRef.current) {
@@ -161,6 +175,7 @@ export function usePomodoroTimer({
   }, [timeLeft, isRunning, mode])
 
   const resetTimer = useCallback(() => {
+    stopAlarm()
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -168,9 +183,10 @@ export function usePomodoroTimer({
     startTimeRef.current = null
     setTimeLeft(getDurationForMode(mode))
     setIsRunning(false)
-  }, [mode, getDurationForMode])
+  }, [mode, getDurationForMode, stopAlarm])
 
   const switchMode = useCallback((newMode: PomodoroMode) => {
+    stopAlarm()
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
@@ -179,14 +195,15 @@ export function usePomodoroTimer({
     setMode(newMode)
     setTimeLeft(getDurationForMode(newMode))
     setIsRunning(false)
-  }, [getDurationForMode])
+  }, [getDurationForMode, stopAlarm])
 
   const start = useCallback(() => {
+    stopAlarm()
     if (timeLeft > 0) {
       startTimeRef.current = Date.now() - (getDurationForMode(mode) - timeLeft) * 1000
       setIsRunning(true)
     }
-  }, [mode, timeLeft, getDurationForMode])
+  }, [mode, timeLeft, getDurationForMode, stopAlarm])
 
   const pause = useCallback(() => {
     setIsRunning(false)
@@ -210,11 +227,13 @@ export function usePomodoroTimer({
     timeLeft,
     isRunning,
     completedSessions,
+    isAlarmPlaying,
     start,
     pause,
     toggle,
     resetTimer,
     switchMode,
+    stopAlarm,
     formatTime,
     progress,
     setTimeLeft,
