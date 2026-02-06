@@ -7,6 +7,11 @@ export interface PomodoroSettings {
   sessionsBeforeLongBreak: number
   sedentaryReminderEnabled: boolean
   sedentaryReminderInterval: number // minutes
+  soundType: 'bell' | 'digital' | 'wood'
+  soundVolume: number // 0-1
+  whiteNoiseType: 'none' | 'rain' | 'forest' | 'cafe'
+  whiteNoiseVolume: number // 0-1
+  hapticsEnabled: boolean
 }
 
 export interface PomodoroSession {

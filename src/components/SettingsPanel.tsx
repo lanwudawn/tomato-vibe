@@ -1,7 +1,5 @@
-'use client'
-
 import { useState } from 'react'
-import { X, Settings } from 'lucide-react'
+import { X, Settings, Volume2, Music, Zap, Volume1 } from 'lucide-react'
 import { PomodoroSettings } from '@/types'
 
 interface SettingsPanelProps {
@@ -139,6 +137,111 @@ export function SettingsPanel({
                     />
                   </div>
                 )}
+              </div>
+
+              {/* Sound Settings */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <Volume2 size={16} />
+                  提示音效
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      类型
+                    </label>
+                    <select
+                      value={settings.soundType}
+                      onChange={e => onSettingsChange({ soundType: e.target.value as any })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
+                                 outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="bell">清脆铃声</option>
+                      <option value="digital">电子音</option>
+                      <option value="wood">木鱼声</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      音量 ({Math.round((settings.soundVolume || 0.5) * 100)}%)
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={settings.soundVolume || 0.5}
+                      onChange={e => onSettingsChange({ soundVolume: parseFloat(e.target.value) })}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* White Noise Settings */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                  <Music size={16} />
+                  白噪音
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                      环境音
+                    </label>
+                    <select
+                      value={settings.whiteNoiseType}
+                      onChange={e => onSettingsChange({ whiteNoiseType: e.target.value as any })}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                                 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
+                                 outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="none">关闭</option>
+                      <option value="rain">雨声</option>
+                      <option value="forest">森林</option>
+                      <option value="cafe">咖啡馆</option>
+                    </select>
+                  </div>
+                  {settings.whiteNoiseType !== 'none' && (
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        音量 ({Math.round((settings.whiteNoiseVolume || 0.5) * 100)}%)
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={settings.whiteNoiseVolume || 0.5}
+                        onChange={e => onSettingsChange({ whiteNoiseVolume: parseFloat(e.target.value) })}
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Haptics Settings */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <Zap size={16} />
+                    触感反馈 (震动)
+                  </label>
+                  <button
+                    onClick={() => onSettingsChange({ hapticsEnabled: !settings.hapticsEnabled })}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ring-offset-white dark:ring-offset-gray-800 ${settings.hapticsEnabled ? 'bg-purple-500' : 'bg-gray-200 dark:bg-gray-700'
+                      }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.hapticsEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               <button

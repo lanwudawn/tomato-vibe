@@ -8,7 +8,7 @@ import { TaskItem } from './TaskItem'
 
 interface TaskListProps {
   tasks: Task[]
-  onAddTask: (title: string) => void
+  onAddTask: (title: string, estimatedPomodoros?: number) => void
   onToggleTask: (id: string) => void
   onDeleteTask: (id: string) => void
   onUpdateTask: (id: string, updates: Partial<Task>) => void
@@ -32,7 +32,15 @@ export function TaskList({
 
   const handleAddTask = () => {
     if (newTaskTitle.trim()) {
-      onAddTask(newTaskTitle.trim())
+      // Parse for quick add format: "Title #3" -> title="Title", estimate=3
+      const regex = /^(.*?)\s*#(\d+)$/
+      const match = newTaskTitle.trim().match(regex)
+
+      if (match) {
+        onAddTask(match[1], parseInt(match[2]))
+      } else {
+        onAddTask(newTaskTitle.trim())
+      }
       setNewTaskTitle('')
     }
   }
@@ -78,7 +86,14 @@ export function TaskList({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div
+      className="w-full max-w-md mx-auto"
+      onDoubleClick={(e) => {
+        if (e.target === e.currentTarget) {
+          document.querySelector<HTMLInputElement>('input[placeholder="添加新任务..."]')?.focus()
+        }
+      }}
+    >
       <div className="flex gap-2 mb-4">
         <input
           type="text"
@@ -122,6 +137,7 @@ export function TaskList({
                   onEditSave={handleSaveEdit}
                   onEditCancel={handleCancelEdit}
                   onEditStart={handleStartEdit}
+                  onUpdateEstimate={(id, estimate) => onUpdateTask(id, { estimated_pomodoros: estimate })}
                 />
               ))}
               {provided.placeholder}

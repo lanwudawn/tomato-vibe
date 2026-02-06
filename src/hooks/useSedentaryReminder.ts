@@ -15,21 +15,11 @@ export function useSedentaryReminder({ enabled, interval }: UseSedentaryReminder
         if (typeof window === 'undefined') return
 
         // Play sound logic similar to usePomodoroTimer
+        // Play sound logic
         try {
-            const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
-            if (AudioContextClass) {
-                const ctx = new AudioContextClass()
-                const osc = ctx.createOscillator()
-                const gain = ctx.createGain()
-                osc.frequency.value = 440 // A4 note
-                osc.type = 'sine'
-                gain.gain.setValueAtTime(0.3, ctx.currentTime)
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5)
-                osc.connect(gain)
-                gain.connect(ctx.destination)
-                osc.start()
-                osc.stop(ctx.currentTime + 0.5)
-            }
+            const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg')
+            audio.volume = 0.5
+            audio.play().catch(e => console.error('Play reminder sound failed', e))
         } catch (e) {
             console.error('Failed to play reminder sound', e)
         }
@@ -37,9 +27,20 @@ export function useSedentaryReminder({ enabled, interval }: UseSedentaryReminder
         // Browser notification
         if ('Notification' in window) {
             if (Notification.permission === 'granted') {
-                new Notification('久坐提醒', {
-                    body: `你已经坐了 ${interval} 分钟了，起来活动一下吧！`,
-                    icon: '/favicon.ico'
+                const stretches = [
+                    '转动颈椎：轻轻转动头部，放松颈部肌肉。',
+                    '拉伸手臂：双手举过头顶，交叉互握，向上伸展。',
+                    '扭转腰部：坐在椅子上，向左右两侧转动上半身。',
+                    '眼部放松：眺望远方，或做眼保健操。',
+                    '起立深蹲：做10个深蹲，激活腿部血液循环。',
+                    '耸肩放松：用力耸肩，保持5秒后放松。'
+                ]
+                const randomStretch = stretches[Math.floor(Math.random() * stretches.length)]
+
+                new Notification('久坐提醒：该动一动了！', {
+                    body: `即使是专注工作，也要注意身体哦。\n建议：${randomStretch}`,
+                    icon: '/favicon.ico',
+                    requireInteraction: true
                 })
             } else if (Notification.permission !== 'denied') {
                 Notification.requestPermission()

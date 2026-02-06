@@ -15,24 +15,62 @@ const modeLabels: Record<PomodoroMode, string> = {
   longBreak: '长休息',
 }
 
-function playCompletionSound(): void {
+
+const sounds = {
+  bell: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg',
+  digital: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
+  wood: 'https://actions.google.com/sounds/v1/foley/wood_hit.ogg',
+}
+
+function playCompletionSound(type: 'bell' | 'digital' | 'wood', volume: number): void {
   if (typeof window === 'undefined') return
+
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-    if (!AudioContextClass) return
-    const ctx = new AudioContextClass()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
-    osc.frequency.value = 800
-    osc.type = 'sine'
-    gain.gain.setValueAtTime(0.3, ctx.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    osc.start()
-    osc.stop(ctx.currentTime + 0.3)
-  } catch {
-    console.error('Failed to play completion sound')
+    const audio = new Audio(sounds[type])
+    audio.volume = volume
+
+    // Create a promise to handle the play attempt
+    const playPromise = audio.play()
+
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.error('Audio playback failed:', error)
+      })
+    }
+  } catch (e) {
+    console.error('Failed to initialize completion sound', e)
+  }
+}
+
+function sendNotification(mode: PomodoroMode) {
+  if (typeof window === 'undefined' || !('Notification' in window)) return
+
+  const titles = {
+    focus: '专注时间结束',
+    shortBreak: '短休息结束',
+    longBreak: '长休息结束'
+  }
+
+  const bodies = {
+    focus: '休息一下吧！喝口水，活动一下。',
+    shortBreak: '准备好开始下一个专注时间了吗？',
+    longBreak: '休息结束，精力充沛地开始工作吧！'
+  }
+
+  if (Notification.permission === 'granted') {
+    new Notification(titles[mode], {
+      body: bodies[mode],
+      icon: '/favicon.ico',
+      requireInteraction: true // Keep notification until user interacts
+    })
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission()
+  }
+}
+
+function triggerHaptics() {
+  if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+    navigator.vibrate([100, 50, 100])
   }
 }
 
@@ -42,6 +80,9 @@ interface UsePomodoroTimerProps {
   longBreakDuration: number
   onSessionComplete?: (mode: PomodoroMode, duration: number, taskId?: string) => void
   taskId?: string | null
+  soundType?: 'bell' | 'digital' | 'wood'
+  soundVolume?: number
+  hapticsEnabled?: boolean
 }
 
 export function usePomodoroTimer({
@@ -50,6 +91,9 @@ export function usePomodoroTimer({
   longBreakDuration,
   onSessionComplete,
   taskId,
+  soundType = 'bell',
+  soundVolume = 0.5,
+  hapticsEnabled = true,
 }: UsePomodoroTimerProps) {
   const [mode, setMode] = useState<PomodoroMode>('focus')
   const [timeLeft, setTimeLeft] = useState(focusDuration * 60)
@@ -84,11 +128,14 @@ export function usePomodoroTimer({
         intervalRef.current = null
       }
       const actualDuration = elapsed
-      playCompletionSound()
+      playCompletionSound(soundType, soundVolume)
+      sendNotification(mode)
+      if (hapticsEnabled) triggerHaptics()
+
       onSessionComplete?.(mode, actualDuration, taskId || undefined)
       setCompletedSessions(prev => prev + 1)
     }
-  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId])
+  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId, soundType, soundVolume, hapticsEnabled])
 
   useEffect(() => {
     if (isRunning && startTimeRef.current) {

@@ -10,6 +10,11 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   sessionsBeforeLongBreak: 4,
   sedentaryReminderEnabled: false,
   sedentaryReminderInterval: 60,
+  soundType: 'bell',
+  soundVolume: 0.5,
+  whiteNoiseType: 'none',
+  whiteNoiseVolume: 0.5,
+  hapticsEnabled: true,
 }
 
 function getInitialSettings(): PomodoroSettings {

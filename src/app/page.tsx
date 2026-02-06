@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { usePomodoroTimer, usePomodoroSettings, useSedentaryReminder } from '@/hooks'
+import { useWhiteNoise } from '@/hooks/useWhiteNoise'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ModeSelector } from '@/components/ModeSelector'
 
@@ -27,7 +28,7 @@ const WebWidget = dynamic(() => import('@/components/WebWidget').then(mod => mod
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { Task } from '@/types'
-import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers } from 'lucide-react'
+import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers, Maximize2, Minimize2 } from 'lucide-react'
 import Link from 'next/link'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
@@ -42,6 +43,7 @@ function PomodoroApp() {
   const [showAuth, setShowAuth] = useState(false)
   const [activeTask, setActiveTask] = useState<{ id: string; title: string } | null>(null)
   const [showWidget, setShowWidget] = useState(false)
+  const [isFocusMode, setIsFocusMode] = useState(false)
 
   const {
     mode,
@@ -71,6 +73,16 @@ function PomodoroApp() {
       }
     },
     taskId: activeTask?.id,
+    soundType: settings.soundType,
+    soundVolume: settings.soundVolume,
+    hapticsEnabled: settings.hapticsEnabled,
+  })
+
+  // White Noise Integration - Must be after timer to access state
+  useWhiteNoise({
+    type: settings.whiteNoiseType,
+    volume: settings.whiteNoiseVolume,
+    enabled: isRunning && mode === 'focus'
   })
 
   const broadcastCache = useRef({
@@ -291,75 +303,87 @@ function PomodoroApp() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
-        <header className="flex flex-wrap justify-between items-center gap-4 mb-8 sm:mb-12">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-            🍅 番茄钟
-          </h1>
-          <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
-            {user ? (
-              <>
-                <div className="flex items-center gap-1 sm:gap-2 text-gray-600 dark:text-gray-400">
-                  <UserIcon size={16} />
-                  <span className="text-xs sm:text-sm hidden sm:inline">{user.email}</span>
-                </div>
-                <Link
-                  href="/stats"
-                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+        {!isFocusMode && (
+          <header className="flex flex-wrap justify-between items-center gap-4 mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              🍅 番茄钟
+            </h1>
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
+              {user ? (
+                <>
+                  <div className="flex items-center gap-1 sm:gap-2 text-gray-600 dark:text-gray-400">
+                    <UserIcon size={16} />
+                    <span className="text-xs sm:text-sm hidden sm:inline">{user.email}</span>
+                  </div>
+                  <Link
+                    href="/stats"
+                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                              hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <BarChart2 size={16} />
-                </Link>
-                <Link
-                  href="/history"
-                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+                  >
+                    <BarChart2 size={16} />
+                  </Link>
+                  <Link
+                    href="/history"
+                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                              hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <History size={16} />
-                </Link>
+                  >
+                    <History size={16} />
+                  </Link>
+                  <button
+                    onClick={signOut}
+                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+                             hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <LogOut size={16} />
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={signOut}
-                  className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
-                             hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <LogOut size={16} />
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setShowAuth(true)}
-                className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-red-500 text-white font-medium text-sm sm:text-base
+                  onClick={() => setShowAuth(true)}
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-red-500 text-white font-medium text-sm sm:text-base
                            hover:bg-red-600 transition-colors"
+                >
+                  登录 / 注册
+                </button>
+              )}
+              <SettingsPanel
+                settings={settings}
+                onSettingsChange={updateSettings}
+                onReset={resetToDefaults}
+              />
+              <button
+                onClick={() => setShowWidget(!showWidget)}
+                className={`p-1.5 sm:p-2 rounded-full transition-colors ${showWidget
+                  ? 'bg-red-100 text-red-600'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
               >
-                登录 / 注册
+                <Layers size={18} />
               </button>
-            )}
-            <SettingsPanel
-              settings={settings}
-              onSettingsChange={updateSettings}
-              onReset={resetToDefaults}
-            />
-            <button
-              onClick={() => setShowWidget(!showWidget)}
-              className={`p-1.5 sm:p-2 rounded-full transition-colors ${showWidget
-                ? 'bg-red-100 text-red-600'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-            >
-              <Layers size={18} />
-            </button>
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
+              <button
+                onClick={() => setIsDark(!isDark)}
+                className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
                          hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          </div>
-        </header>
+              >
+                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            </div>
+          </header>
+        )}
 
         <WebWidget isOpen={showWidget} onClose={() => setShowWidget(false)} />
         <main className="space-y-12">
-          <section className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8">
+          <section className={`bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8 transition-all duration-500 ${isFocusMode ? 'scale-110 py-20' : ''}`}>
+            {/* Focus Mode Toggle Button */}
+            <div className="absolute top-4 right-4">
+              <button
+                onClick={() => setIsFocusMode(!isFocusMode)}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                title={isFocusMode ? "退出专注模式" : "进入专注模式"}
+              >
+                {isFocusMode ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+              </button>
+            </div>
             <ModeSelector
               currentMode={mode}
               onModeChange={switchMode}
@@ -385,24 +409,26 @@ function PomodoroApp() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              任务列表
-            </h2>
-            <TaskList
-              tasks={tasks}
-              onAddTask={handleAddTask}
-              onToggleTask={handleToggleTask}
-              onDeleteTask={handleDeleteTask}
-              onUpdateTask={handleUpdateTask}
-              onReorderTasks={handleReorderTasks}
-              activeTaskId={activeTask?.id}
-              onSelectTask={setActiveTask}
-            />
-          </section>
+          {!isFocusMode && (
+            <section>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                任务列表
+              </h2>
+              <TaskList
+                tasks={tasks}
+                onAddTask={handleAddTask}
+                onToggleTask={handleToggleTask}
+                onDeleteTask={handleDeleteTask}
+                onUpdateTask={handleUpdateTask}
+                onReorderTasks={handleReorderTasks}
+                activeTaskId={activeTask?.id}
+                onSelectTask={setActiveTask}
+              />
+            </section>
+          )}
         </main>
       </div>
-    </div>
+    </div >
   )
 }
 

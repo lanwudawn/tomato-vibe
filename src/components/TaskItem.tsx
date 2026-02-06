@@ -17,6 +17,7 @@ interface TaskItemProps {
     onEditSave: (id: string, title: string) => void
     onEditCancel: () => void
     onEditStart: (id: string) => void
+    onUpdateEstimate?: (id: string, estimate: number) => void
 }
 
 export const TaskItem = memo(function TaskItem({
@@ -30,6 +31,7 @@ export const TaskItem = memo(function TaskItem({
     onEditSave,
     onEditCancel,
     onEditStart,
+    onUpdateEstimate,
 }: TaskItemProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const [localTitle, setLocalTitle] = useState(task.title)
@@ -131,9 +133,26 @@ export const TaskItem = memo(function TaskItem({
                         </div>
                     )}
 
-                    <div className="flex items-center gap-2 text-sm text-gray-500 flex-shrink-0">
-                        <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
-                            {task.completed_pomodoros}/{task.estimated_pomodoros || '∞'}
+                    <div className="flex items-center gap-1 text-sm text-gray-500 flex-shrink-0">
+                        <span className={`px-2 py-0.5 rounded transition-colors ${task.estimated_pomodoros && task.completed_pomodoros > task.estimated_pomodoros
+                            ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300'
+                            : 'bg-gray-100 dark:bg-gray-700'
+                            }`}>
+                            {task.completed_pomodoros}
+                            <span className="mx-1">/</span>
+                            <input
+                                type="number"
+                                min="0"
+                                max="99"
+                                className="w-6 bg-transparent outline-none text-center hover:bg-black/5 dark:hover:bg-white/10 rounded cursor-pointer"
+                                value={task.estimated_pomodoros || ''}
+                                placeholder="∞"
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value)
+                                    onUpdateEstimate?.(task.id, isNaN(val) ? 0 : val)
+                                }}
+                            />
                         </span>
                     </div>
 
