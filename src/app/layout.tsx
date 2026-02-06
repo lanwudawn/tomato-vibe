@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "番茄钟 - Pomodoro Timer",
-  description: "一个简洁美观的番茄钟应用，帮助你提高专注力",
+  title: "洋柿子氛围 - Pomodoro Timer",
+  description: "一个简洁美观的洋柿子氛围应用，帮助你提高专注力",
 };
 
 export default function RootLayout({

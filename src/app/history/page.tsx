@@ -70,7 +70,7 @@ export default async function HistoryPage() {
         <main>
           {sessions.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
-              还没有完成任何番茄钟，开始专注吧！
+              还没有完成任何洋柿子氛围，开始专注吧！
             </div>
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">

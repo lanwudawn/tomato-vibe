@@ -162,7 +162,7 @@ export function TaskList({
                 开始你的专注之旅 🚀
               </h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto">
-                番茄钟帮你进入心流状态，每一次专注都是成长的积累。
+                洋柿子氛围帮你进入心流状态，每一次专注都是成长的积累。
               </p>
             </div>
             <div className="flex flex-col gap-2 mt-2">

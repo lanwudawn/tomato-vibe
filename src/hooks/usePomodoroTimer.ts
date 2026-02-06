@@ -151,12 +151,12 @@ export function usePomodoroTimer({
 
   useEffect(() => {
     if (isRunning) {
-      document.title = `(${formatTime(timeLeft)}) ${modeLabels[mode]} - 番茄钟`
+      document.title = `(${formatTime(timeLeft)}) ${modeLabels[mode]} - 洋柿子氛围`
     } else {
-      document.title = '番茄钟'
+      document.title = '洋柿子氛围'
     }
     return () => {
-      document.title = '番茄钟'
+      document.title = '洋柿子氛围'
     }
   }, [timeLeft, isRunning, mode])
 

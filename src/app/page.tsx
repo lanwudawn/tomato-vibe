@@ -306,7 +306,7 @@ function PomodoroApp() {
         {!isFocusMode && (
           <header className="flex flex-wrap justify-between items-center gap-4 mb-8 sm:mb-12">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              🍅 番茄钟
+              🍅 洋柿子氛围
             </h1>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
               {user ? (
