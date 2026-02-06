@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { usePomodoroTimer, usePomodoroSettings, useSedentaryReminder } from '@/hooks'
+import { usePomodoroSettings, useSedentaryReminder } from '@/hooks'
 import { useWhiteNoise } from '@/hooks/useWhiteNoise'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ModeSelector } from '@/components/ModeSelector'
@@ -22,18 +22,15 @@ const AuthForm = dynamic(() => import('@/components/AuthForm').then(mod => mod.A
   ssr: false
 })
 
-const WebWidget = dynamic(() => import('@/components/WebWidget').then(mod => mod.WebWidget), {
-  ssr: false
-})
-
 import { useAuth } from '@/contexts/AuthContext'
+import { useTimer } from '@/contexts/TimerContext'
 import { Task } from '@/types'
-import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers, Maximize2, Minimize2 } from 'lucide-react'
+import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Maximize2, Minimize2 } from 'lucide-react'
 import Link from 'next/link'
 import { clsx } from 'clsx'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
-import { broadcastTimerState, broadcastSessionComplete, getStoredUserId } from '@/lib/supabase/broadcast'
+import { AuraGuide } from '@/components/AuraGuide'
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -42,8 +39,6 @@ function PomodoroApp() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [isDark, setIsDark] = useState<boolean | null>(null)
   const [showAuth, setShowAuth] = useState(false)
-  const [activeTask, setActiveTask] = useState<{ id: string; title: string } | null>(null)
-  const [showWidget, setShowWidget] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
 
   const {
@@ -58,28 +53,24 @@ function PomodoroApp() {
     stopAlarm,
     progress,
     setTimeLeft,
-  } = usePomodoroTimer({
-    focusDuration: settings.focusDuration,
-    shortBreakDuration: settings.shortBreakDuration,
-    longBreakDuration: settings.longBreakDuration,
-    onSessionComplete: async (sessionMode, duration, taskId) => {
-      if (user) {
-        await saveSession({ mode: sessionMode, duration })
-      }
-      await broadcastSessionComplete(sessionMode, duration, taskId)
-      if (sessionMode === 'focus' && taskId) {
-        const task = tasks.find(t => t.id === taskId)
+    activeTask,
+    setActiveTask
+  } = useTimer()
+
+  // Handle task completion increment when a focus session ends
+  const prevSessions = useRef(completedSessions)
+  useEffect(() => {
+    if (completedSessions > prevSessions.current) {
+      if (mode === 'focus' && activeTask) {
+        const task = tasks.find(t => t.id === activeTask.id)
         if (task) {
           const newCount = (task.completed_pomodoros || 0) + 1
-          await handleUpdateTask(taskId, { completed_pomodoros: newCount })
+          handleUpdateTask(activeTask.id, { completed_pomodoros: newCount })
         }
       }
-    },
-    taskId: activeTask?.id,
-    soundType: settings.soundType,
-    soundVolume: settings.soundVolume,
-    hapticsEnabled: settings.hapticsEnabled,
-  })
+    }
+    prevSessions.current = completedSessions
+  }, [completedSessions, mode, activeTask, tasks])
 
   // White Noise Integration - Must be after timer to access state
   useWhiteNoise({
@@ -88,32 +79,6 @@ function PomodoroApp() {
     enabled: isRunning && mode === 'focus'
   })
 
-  const broadcastCache = useRef({
-    time: 0,
-    isRunning: false,
-    mode: '',
-    taskId: undefined as string | undefined
-  })
-  useEffect(() => {
-    const now = Date.now()
-    const stateChanged =
-      isRunning !== broadcastCache.current.isRunning ||
-      mode !== broadcastCache.current.mode ||
-      activeTask?.id !== broadcastCache.current.taskId
-
-    // 状态变更（运行中/停止/切换模式/切换任务）立即同步，否则每 10 秒同步一次时间
-    const shouldBroadcast = stateChanged || (now - broadcastCache.current.time > 10000)
-
-    if (shouldBroadcast) {
-      broadcastTimerState(mode, timeLeft, isRunning, activeTask, completedSessions)
-      broadcastCache.current = {
-        time: now,
-        isRunning,
-        mode,
-        taskId: activeTask?.id
-      }
-    }
-  }, [mode, timeLeft, isRunning, activeTask, completedSessions])
 
   const { resetReminder } = useSedentaryReminder({
     enabled: settings.sedentaryReminderEnabled,
@@ -354,17 +319,6 @@ function PomodoroApp() {
                 onReset={resetToDefaults}
               />
               <button
-                onClick={() => setShowWidget(!showWidget)}
-                className={clsx(
-                  "p-2 rounded-xl transition-all",
-                  showWidget
-                    ? "bg-tomato text-white shadow-lg"
-                    : "bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg"
-                )}
-              >
-                <Layers size={20} />
-              </button>
-              <button
                 onClick={() => setIsDark(!isDark)}
                 className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
               >
@@ -384,8 +338,6 @@ function PomodoroApp() {
             </button>
           </div>
         )}
-
-        <WebWidget isOpen={showWidget} onClose={() => setShowWidget(false)} />
 
         <main className={clsx(
           "flex flex-col items-center gap-12 transition-all duration-1000",
@@ -436,27 +388,30 @@ function PomodoroApp() {
           </section>
 
           {!isFocusMode && (
-            <section className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                  今日计划
-                </h2>
-                <div className="h-0.5 flex-1 mx-6 bg-gray-100 dark:bg-gray-800 rounded-full" />
-                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                  {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
-                </span>
-              </div>
-              <TaskList
-                tasks={tasks}
-                onAddTask={handleAddTask}
-                onToggleTask={handleToggleTask}
-                onDeleteTask={handleDeleteTask}
-                onUpdateTask={handleUpdateTask}
-                onReorderTasks={handleReorderTasks}
-                activeTaskId={activeTask?.id}
-                onSelectTask={setActiveTask}
-              />
-            </section>
+            <>
+              <section className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                    今日计划
+                  </h2>
+                  <div className="h-0.5 flex-1 mx-6 bg-gray-100 dark:bg-gray-800 rounded-full" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                    {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
+                  </span>
+                </div>
+                <TaskList
+                  tasks={tasks}
+                  onAddTask={handleAddTask}
+                  onToggleTask={handleToggleTask}
+                  onDeleteTask={handleDeleteTask}
+                  onUpdateTask={handleUpdateTask}
+                  onReorderTasks={handleReorderTasks}
+                  activeTaskId={activeTask?.id}
+                  onSelectTask={setActiveTask}
+                />
+              </section>
+              <AuraGuide />
+            </>
           )}
         </main>
       </div>

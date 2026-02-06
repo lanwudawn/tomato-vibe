@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 
-export type WhiteNoiseType = 'none' | 'rain' | 'forest' | 'cafe'
+export type WhiteNoiseType = 'none' | 'rain' | 'cafe'
 
 const NOISE_URLS: Record<Exclude<WhiteNoiseType, 'none'>, string> = {
     rain: 'https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg',
-    forest: 'https://actions.google.com/sounds/v1/ambiences/spring_day_forest.ogg',
     cafe: 'https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg',
 }
 
@@ -23,6 +22,7 @@ export function useWhiteNoise({ type, volume, enabled }: UseWhiteNoiseProps) {
         // Cleanup previous audio if it exists
         if (audioRef.current) {
             audioRef.current.pause()
+            audioRef.current.src = ''
             audioRef.current = null
         }
 
@@ -38,13 +38,22 @@ export function useWhiteNoise({ type, volume, enabled }: UseWhiteNoiseProps) {
                 await audio.play()
             } catch (err) {
                 console.warn('White noise autoplay failed:', err)
+                // Fallback for browser interaction requirement
+                const playOnGesture = () => {
+                    audio.play().catch(e => console.error('Gesture play failed:', e))
+                    window.removeEventListener('click', playOnGesture)
+                }
+                window.addEventListener('click', playOnGesture)
             }
         }
 
         playAudio()
 
         return () => {
-            audio.pause()
+            if (audio) {
+                audio.pause()
+                audio.src = ''
+            }
             audioRef.current = null
         }
     }, [type, enabled])

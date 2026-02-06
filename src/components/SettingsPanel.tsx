@@ -207,7 +207,6 @@ export function SettingsPanel({
                     >
                       <option value="none">关闭</option>
                       <option value="rain">雨声</option>
-                      <option value="forest">森林</option>
                       <option value="cafe">咖啡馆</option>
                     </select>
                   </div>

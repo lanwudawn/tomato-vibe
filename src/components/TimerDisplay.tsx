@@ -103,6 +103,11 @@ export function TimerDisplay({
           <span className="absolute text-7xl sm:text-8xl font-bold text-gray-800 dark:text-white timer-text">
             {formatTime(timeLeft)}
           </span>
+          {!isRunning && !isAlarmPlaying && (
+            <div className="absolute bottom-16 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 animate-pulse">
+              Press Space to Start
+            </div>
+          )}
         </div>
 
         {isAlarmPlaying && (

@@ -58,6 +58,16 @@ function triggerHaptics() {
   }
 }
 
+// Guaranteed local fallback bell sound (Data URI)
+const BASE64_BELL = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZzoAAAAPAAAAEAAADwAABwcHBwcHBwcHBwcHBwcHBwcHDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMP///8AAAALRE9NSRIAAAAAAABpY3VsdGNvbmZpZ3VyZSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/+5BkAAAE8AUEsAFGAAAJ4AoAAAEMOQS/AAUoAAAnfCgAAAChU0FNTFJSRQCf9f7/1v7///6/////////////////////////////////////+nSAn1EAAAwAn9EgAA7iYp/REAAAMAn9C8An8mOf0RAADAn9C8An8mOf0RAADAn9C8An9Ejv0RAADAmf0RAADAmOf0RAADAmOf0RAADAmOf0RAADAmOf0RAADAmOf0RAADAmOf0RAADAnf9C8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8AAAAAAI8jI8jI8v/7kmQAAL3ABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAL8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8AAAAAAI8jI8jI8v/7kmQAAL3ABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAL8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8AAAAAAI8jI8jI8v/7kmQAAL3ABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAL8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8AAAAAAI8jI8jI8v/7kmQAAL3ABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAL8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8AAAAAAI8jI8jI8v/7kmQAAL3ABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAL8AAAAAAI8jI8jI8v/7kmQAAPXABW5AAU5AAArSBoAABH6P8SJIyPIyPL/+/+5JkAAD8A'
+
+// CDN URLs for nicer sounds
+const SOUND_URLS = {
+  bell: 'https://cdn.pixabay.com/audio/2021/08/04/audio_06d8a3915f.mp3',
+  digital: 'https://cdn.pixabay.com/audio/2022/03/15/audio_e6e5a6f3b0.mp3',
+  wood: 'https://cdn.pixabay.com/audio/2021/08/04/audio_145d3de26d.mp3',
+}
+
 export function usePomodoroTimer({
   focusDuration,
   shortBreakDuration,
@@ -74,47 +84,105 @@ export function usePomodoroTimer({
   const [completedSessions, setCompletedSessions] = useState(0)
   const [isAlarmPlaying, setIsAlarmPlaying] = useState(false)
 
-  const startTimeRef = useRef<number | null>(null)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const alarmAudioRef = useRef<HTMLAudioElement | null>(null)
 
   const stopAlarm = useCallback(() => {
     if (alarmAudioRef.current) {
-      alarmAudioRef.current.pause()
-      alarmAudioRef.current.currentTime = 0
+      const audio = alarmAudioRef.current
       alarmAudioRef.current = null
       setIsAlarmPlaying(false)
+
+      // Safety check: pause() might interrupt a pending play()
+      try {
+        audio.pause()
+        audio.currentTime = 0
+      } catch (e) {
+        // Ignore errors during silent stop
+      }
     }
   }, [])
 
   const playCompletionSound = useCallback((type: 'bell' | 'digital' | 'wood', volume: number) => {
     if (typeof window === 'undefined') return
 
-    const sounds = {
-      bell: 'https://actions.google.com/sounds/v1/alarms/mechanical_clock_ring.ogg',
-      digital: 'https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg',
-      wood: 'https://actions.google.com/sounds/v1/foley/wood_hit.ogg',
-    }
-
-    try {
+    const tryPlay = (url: string, isFallback: boolean = false) => {
       stopAlarm()
-      const audio = new Audio(sounds[type])
+      const audio = new Audio(url)
       audio.volume = volume
-      audio.onended = () => setIsAlarmPlaying(false)
       alarmAudioRef.current = audio
 
       const playPromise = audio.play()
       if (playPromise !== undefined) {
         setIsAlarmPlaying(true)
         playPromise.catch((error) => {
-          console.error('Audio playback failed:', error)
-          setIsAlarmPlaying(false)
+          if (!isFallback) {
+            console.warn(`Primary audio ${type} failed, trying fallback. Error:`, error.name)
+            // Fallback to data URI for bell, or synthesized for others
+            if (type === 'bell') tryPlay(BASE64_BELL, true)
+            else playSynthesizedSound(type, volume)
+          } else {
+            console.error('Fallback audio also failed:', error)
+            playSynthesizedSound(type, volume)
+          }
         })
+
+        audio.onended = () => {
+          setIsAlarmPlaying(false)
+          alarmAudioRef.current = null
+        }
       }
+    }
+
+    try {
+      tryPlay(SOUND_URLS[type])
     } catch (e) {
-      console.error('Failed to initialize completion sound', e)
+      console.warn('Audio initialization failed, using fallback', e)
+      if (type === 'bell') tryPlay(BASE64_BELL, true)
+      else playSynthesizedSound(type, volume)
     }
   }, [stopAlarm])
+
+  const playSynthesizedSound = (type: string, volume: number) => {
+    if (typeof window === 'undefined') return
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      if (!AudioCtx) return
+
+      const ctx = new AudioCtx()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      const now = ctx.currentTime
+      gain.gain.setValueAtTime(0, now)
+      gain.gain.linearRampToValueAtTime(volume, now + 0.05)
+
+      if (type === 'bell') {
+        osc.type = 'sine'
+        osc.frequency.setValueAtTime(880, now)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5)
+        osc.start(now)
+        osc.stop(now + 1.5)
+      } else if (type === 'digital') {
+        osc.type = 'square'
+        osc.frequency.setValueAtTime(1000, now)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5)
+        osc.start(now)
+        osc.stop(now + 0.5)
+      } else {
+        osc.type = 'triangle'
+        osc.frequency.setValueAtTime(200, now)
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
+        osc.start(now)
+        osc.stop(now + 0.3)
+      }
+    } catch (e) {
+      console.error('Synthesized audio failed:', e)
+    }
+  }
 
   const getDurationForMode = useCallback((currentMode: PomodoroMode) => {
     switch (currentMode) {
@@ -127,41 +195,57 @@ export function usePomodoroTimer({
     }
   }, [focusDuration, shortBreakDuration, longBreakDuration])
 
-  const updateTimeLeft = useCallback(() => {
-    if (!startTimeRef.current || !isRunning) return
-
-    const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000)
-    const totalDuration = getDurationForMode(mode)
-    const remaining = Math.max(0, totalDuration - elapsed)
-    setTimeLeft(remaining)
-
-    if (remaining <= 0) {
-      setIsRunning(false)
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
-      const actualDuration = elapsed
-      playCompletionSound(soundType, soundVolume)
-      sendNotification(mode)
-      if (hapticsEnabled) triggerHaptics()
-
-      onSessionComplete?.(mode, actualDuration, taskId || undefined)
-      setCompletedSessions(prev => prev + 1)
+  const resetTimer = useCallback(() => {
+    stopAlarm()
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
     }
-  }, [mode, isRunning, getDurationForMode, onSessionComplete, taskId, soundType, soundVolume, hapticsEnabled, playCompletionSound])
+    setTimeLeft(getDurationForMode(mode))
+    setIsRunning(false)
+  }, [mode, getDurationForMode, stopAlarm])
+
+  const switchMode = useCallback((newMode: PomodoroMode) => {
+    stopAlarm()
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+    setMode(newMode)
+    setTimeLeft(getDurationForMode(newMode))
+    setIsRunning(false)
+  }, [getDurationForMode, stopAlarm])
 
   useEffect(() => {
-    if (isRunning && startTimeRef.current) {
-      intervalRef.current = setInterval(updateTimeLeft, 1000)
+    if (isRunning) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false)
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current)
+              intervalRef.current = null
+            }
+
+            playCompletionSound(soundType, soundVolume)
+            sendNotification(mode)
+            if (hapticsEnabled) triggerHaptics()
+            onSessionComplete?.(mode, getDurationForMode(mode), taskId || undefined)
+            setCompletedSessions(c => c + 1)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
     }
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
     }
-  }, [isRunning, updateTimeLeft])
+  }, [isRunning, mode, getDurationForMode, onSessionComplete, taskId, soundType, soundVolume, hapticsEnabled, playCompletionSound])
 
   useEffect(() => {
     if (isRunning) {
@@ -174,36 +258,12 @@ export function usePomodoroTimer({
     }
   }, [timeLeft, isRunning, mode])
 
-  const resetTimer = useCallback(() => {
-    stopAlarm()
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    startTimeRef.current = null
-    setTimeLeft(getDurationForMode(mode))
-    setIsRunning(false)
-  }, [mode, getDurationForMode, stopAlarm])
-
-  const switchMode = useCallback((newMode: PomodoroMode) => {
-    stopAlarm()
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
-    }
-    startTimeRef.current = null
-    setMode(newMode)
-    setTimeLeft(getDurationForMode(newMode))
-    setIsRunning(false)
-  }, [getDurationForMode, stopAlarm])
-
   const start = useCallback(() => {
     stopAlarm()
     if (timeLeft > 0) {
-      startTimeRef.current = Date.now() - (getDurationForMode(mode) - timeLeft) * 1000
       setIsRunning(true)
     }
-  }, [mode, timeLeft, getDurationForMode, stopAlarm])
+  }, [timeLeft, stopAlarm])
 
   const pause = useCallback(() => {
     setIsRunning(false)
@@ -228,14 +288,14 @@ export function usePomodoroTimer({
     isRunning,
     completedSessions,
     isAlarmPlaying,
-    start,
-    pause,
     toggle,
     resetTimer,
     switchMode,
     stopAlarm,
-    formatTime,
     progress,
     setTimeLeft,
+    start,
+    pause,
+    formatTime,
   }
 }

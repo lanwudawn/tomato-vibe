@@ -164,19 +164,22 @@ export function TaskList({
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                “洋柿子” 正在放空...
+                “洋柿子” 正在等待目标...
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-[240px] mx-auto leading-relaxed">
-                还没开始任务吗？此时此刻，正是进入深度专注的最佳时机。
+              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-[280px] mx-auto leading-relaxed">
+                还没开始任务吗？输入任务并按回车即可添加。点击任务标题，让“洋柿子”陪你一起达成它。
               </p>
             </div>
-            <button
-              onClick={addExampleTask}
-              className="mt-2 text-sm font-semibold text-tomato hover:text-tomato-deep transition-colors flex items-center gap-2 group"
-            >
-              <Lightbulb size={16} className="group-hover:rotate-12 transition-transform" />
-              <span>试试：阅读 25 分钟</span>
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              <button
+                onClick={addExampleTask}
+                className="mt-2 text-sm font-semibold text-tomato hover:text-tomato-deep transition-colors flex items-center gap-2 group"
+              >
+                <Lightbulb size={16} className="group-hover:rotate-12 transition-transform" />
+                <span>试试：阅读 25 分钟</span>
+              </button>
+              <p className="text-[10px] text-gray-400 dark:text-gray-600 font-medium">支持 "任务名称 #番茄数" 快速设定目标</p>
+            </div>
           </div>
         </div>
       )}

@@ -54,10 +54,12 @@ export async function updateTask(id: string, updates: Partial<Task>): Promise<bo
 
   if (!user) return false
 
+  const { id: _, user_id: __, created_at: ___, ...dbUpdates } = updates
+
   const { error } = await supabase
     .from('tasks')
     .update({
-      ...updates,
+      ...dbUpdates,
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
