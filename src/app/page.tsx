@@ -30,7 +30,7 @@ import Link from 'next/link'
 import { clsx } from 'clsx'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
-import { AuraGuide } from '@/components/AuraGuide'
+
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -410,7 +410,6 @@ function PomodoroApp() {
                   onSelectTask={setActiveTask}
                 />
               </section>
-              <AuraGuide />
             </>
           )}
         </main>
