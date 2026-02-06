@@ -7,6 +7,7 @@ export const translations = {
         cancel: "Cancel",
         close: "Close",
         minutes: "mins",
+        hours: "h",
         less: "Less",
         more: "More",
 
@@ -114,6 +115,30 @@ export const translations = {
         todaysPlan: "Today's Plan",
         task: "Task",
         tasks: "Tasks",
+
+        // Statistics
+        statsTitle: "Statistics Center",
+        return: "Back",
+        todayFocus: "Today",
+        weekFocus: "This Week",
+        completedTasks: "Completed",
+        completionRate: "Completion Rate",
+        focusHeatmap: "Heatmap (Last Year)",
+        currentBadge: "Current Badge",
+
+        // Badges
+        badge_flowMaster: "Flow Master",
+        badge_flowMaster_desc: "Total focus time > 100h",
+        badge_focusExpert: "Focus Expert",
+        badge_focusExpert_desc: "Total focus time > 50h",
+        badge_advancedWalker: "Advanced Achiever",
+        badge_advancedWalker_desc: "Total focus time > 10h",
+        badge_beginner: "Beginner",
+        badge_beginner_desc: "Start your focus journey",
+
+        // History
+        historyTitle: "History",
+        noHistory: "No focus sessions yet, start focusing!",
     },
     zh: {
         // Common
@@ -121,6 +146,7 @@ export const translations = {
         cancel: "取消",
         close: "关闭",
         minutes: "分钟",
+        hours: "小时",
         less: "少",
         more: "多",
 
@@ -228,5 +254,29 @@ export const translations = {
         todaysPlan: "今日计划",
         task: "任务",
         tasks: "任务",
+
+        // Statistics
+        statsTitle: "统计中心",
+        return: "返回",
+        todayFocus: "今日专注",
+        weekFocus: "本周专注",
+        completedTasks: "完成任务",
+        completionRate: "完成率",
+        focusHeatmap: "专注热力图 (过去一年)",
+        currentBadge: "当前称号",
+
+        // Badges
+        badge_flowMaster: "心流大师",
+        badge_flowMaster_desc: "累计专注超过100小时",
+        badge_focusExpert: "专注专家",
+        badge_focusExpert_desc: "累计专注超过50小时",
+        badge_advancedWalker: "进阶行者",
+        badge_advancedWalker_desc: "累计专注超过10小时",
+        badge_beginner: "初出茅庐",
+        badge_beginner_desc: "开始你的专注之旅",
+
+        // History
+        historyTitle: "历史记录",
+        noHistory: "还没有完成任何洋柿子氛围，开始专注吧！",
     }
 };
