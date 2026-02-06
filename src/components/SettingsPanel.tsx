@@ -26,19 +26,25 @@ export function SettingsPanel({
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <div className="flex items-center justify-between mb-6">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-xl flex flex-col max-h-[90vh]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">设置</h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   专注时长（分钟）
@@ -244,14 +250,27 @@ export function SettingsPanel({
                 </div>
               </div>
 
-              <button
-                onClick={onReset}
-                className="w-full py-2 px-4 rounded-lg border border-gray-300 dark:border-gray-600
-                           text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700
-                           transition-colors"
-              >
-                恢复默认设置
-              </button>
+              <div className="pt-4">
+                <button
+                  onClick={onReset}
+                  className="w-full py-2 px-4 rounded-lg border border-gray-300 dark:border-gray-600
+                             text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700
+                             transition-colors"
+                >
+                  恢复默认设置
+                </button>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="w-full py-3 px-4 rounded-xl bg-red-500 text-white font-bold
+                             hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all
+                             active:scale-95"
+                >
+                  确认
+                </button>
+              </div>
             </div>
           </div>
         </div>
