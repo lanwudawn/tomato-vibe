@@ -22,6 +22,10 @@ const AuthForm = dynamic(() => import('@/components/AuthForm').then(mod => mod.A
   ssr: false
 })
 
+const WelcomePopup = dynamic(() => import('@/components/WelcomePopup').then(mod => mod.WelcomePopup), {
+  ssr: false
+})
+
 import { useAuth } from '@/contexts/AuthContext'
 import { useTimer } from '@/contexts/TimerContext'
 import { Task } from '@/types'
@@ -414,6 +418,7 @@ function PomodoroApp() {
           )}
         </main>
       </div>
+      <WelcomePopup />
     </div >
   )
 }
