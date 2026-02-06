@@ -8,6 +8,8 @@ const DEFAULT_SETTINGS: PomodoroSettings = {
   shortBreakDuration: 5,
   longBreakDuration: 15,
   sessionsBeforeLongBreak: 4,
+  sedentaryReminderEnabled: false,
+  sedentaryReminderInterval: 60,
 }
 
 function getInitialSettings(): PomodoroSettings {

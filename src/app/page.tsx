@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { usePomodoroTimer, usePomodoroSettings } from '@/hooks'
+import { usePomodoroTimer, usePomodoroSettings, useSedentaryReminder } from '@/hooks'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ModeSelector } from '@/components/ModeSelector'
 
@@ -38,7 +38,7 @@ function PomodoroApp() {
   const { settings, updateSettings, resetToDefaults } = usePomodoroSettings()
 
   const [tasks, setTasks] = useState<Task[]>([])
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState<boolean | null>(null)
   const [showAuth, setShowAuth] = useState(false)
   const [activeTask, setActiveTask] = useState<{ id: string; title: string } | null>(null)
   const [showWidget, setShowWidget] = useState(false)
@@ -100,16 +100,43 @@ function PomodoroApp() {
     }
   }, [mode, timeLeft, isRunning, activeTask, completedSessions])
 
+  const { resetReminder } = useSedentaryReminder({
+    enabled: settings.sedentaryReminderEnabled,
+    interval: settings.sedentaryReminderInterval,
+  })
+
+  // 当切换到休息模式时，重置久坐提醒计时
+  useEffect(() => {
+    if (mode === 'shortBreak' || mode === 'longBreak') {
+      resetReminder()
+    }
+  }, [mode, resetReminder])
+
   const loadTasks = useCallback(async () => {
     const data = await getTasks()
     setTasks(data)
   }, [])
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      setIsDark(true)
+    } else {
+      setIsDark(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isDark === null) return
+
     if (isDark) {
       document.documentElement.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
     } else {
       document.documentElement.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
     }
   }, [isDark])
 

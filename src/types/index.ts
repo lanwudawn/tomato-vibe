@@ -5,6 +5,8 @@ export interface PomodoroSettings {
   shortBreakDuration: number // minutes
   longBreakDuration: number // minutes
   sessionsBeforeLongBreak: number
+  sedentaryReminderEnabled: boolean
+  sedentaryReminderInterval: number // minutes
 }
 
 export interface PomodoroSession {
