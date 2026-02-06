@@ -26,7 +26,7 @@ const WebWidget = dynamic(() => import('@/components/WebWidget').then(mod => mod
   ssr: false
 })
 
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { Task } from '@/types'
 import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers, Maximize2, Minimize2 } from 'lucide-react'
 import Link from 'next/link'
@@ -434,8 +434,6 @@ function PomodoroApp() {
 
 export default function Home() {
   return (
-    <AuthProvider>
-      <PomodoroApp />
-    </AuthProvider>
+    <PomodoroApp />
   )
 }
