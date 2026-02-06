@@ -62,7 +62,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
         className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700 overflow-hidden relative"
       >
         {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-red-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 h-64 bg-tomato/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 h-64 bg-orange-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10">
@@ -74,7 +74,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               initial={false}
               animate={{ rotate: isLogin ? 0 : 360 }}
               transition={{ type: "spring", duration: 1.5 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 text-white mb-4 shadow-lg shadow-red-500/30"
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-tomato to-orange-500 text-white mb-4 shadow-lg shadow-tomato/30"
             >
               <Sparkles size={32} />
             </motion.div>
@@ -103,7 +103,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                   邮箱
                 </label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-500 transition-colors" size={20} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tomato transition-colors" size={20} />
                   <input
                     type="email"
                     value={email}
@@ -111,7 +111,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                     required
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600
                              bg-gray-50/50 dark:bg-gray-700/50 text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none"
+                             focus:ring-2 focus:ring-tomato/20 focus:border-tomato transition-all outline-none"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -122,7 +122,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                   密码
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-red-500 transition-colors" size={20} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tomato transition-colors" size={20} />
                   <input
                     type="password"
                     value={password}
@@ -131,7 +131,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                     minLength={6}
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600
                              bg-gray-50/50 dark:bg-gray-700/50 text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all outline-none"
+                             focus:ring-2 focus:ring-tomato/20 focus:border-tomato transition-all outline-none"
                     placeholder="••••••••"
                   />
                 </div>
@@ -157,8 +157,8 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold
-                       shadow-xl shadow-red-500/20 hover:shadow-red-500/30
+              className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-tomato to-orange-500 text-white font-bold
+                       shadow-xl shadow-tomato/20 hover:shadow-tomato/30
                        disabled:opacity-70 disabled:cursor-not-allowed transition-all
                        flex items-center justify-center gap-2"
             >
@@ -214,7 +214,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               {isLogin ? '还没有账户？' : '已有账户？'}
               <button
                 onClick={toggleMode}
-                className="ml-2 font-semibold text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                className="ml-2 font-semibold text-tomato hover:text-tomato-deep dark:hover:text-tomato transition-colors"
               >
                 {isLogin ? '点击注册' : '去登录'}
               </button>

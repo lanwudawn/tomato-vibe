@@ -30,6 +30,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Task } from '@/types'
 import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers, Maximize2, Minimize2 } from 'lucide-react'
 import Link from 'next/link'
+import { clsx } from 'clsx'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
 import { broadcastTimerState, broadcastSessionComplete, getStoredUserId } from '@/lib/supabase/broadcast'
@@ -294,54 +295,53 @@ function PomodoroApp() {
 
   if (!user && showAuth) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <AuthForm onSuccess={() => setShowAuth(false)} />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+    <div className="min-h-screen bg-background transition-colors selection:bg-tomato/30 selection:text-tomato flex flex-col items-center">
+      <div className={clsx(
+        "container mx-auto px-4 py-6 sm:py-8 max-w-4xl transition-all duration-1000",
+        isFocusMode ? "max-w-full" : ""
+      )}>
         {!isFocusMode && (
-          <header className="flex flex-wrap justify-between items-center gap-4 mb-8 sm:mb-12">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              🍅 洋柿子氛围
+          <header className="flex flex-wrap justify-between items-center gap-4 mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3 tracking-tighter">
+              <span className="text-tomato drop-shadow-sm">🍅</span> 洋柿子氛围
             </h1>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
               {user ? (
                 <>
-                  <div className="flex items-center gap-1 sm:gap-2 text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-2 text-gray-400 font-medium">
                     <UserIcon size={16} />
-                    <span className="text-xs sm:text-sm hidden sm:inline">{user.email}</span>
+                    <span className="text-sm hidden sm:inline">{user.email}</span>
                   </div>
                   <Link
                     href="/stats"
-                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
-                             hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
                   >
-                    <BarChart2 size={16} />
+                    <BarChart2 size={18} />
                   </Link>
                   <Link
                     href="/history"
-                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
-                             hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
                   >
-                    <History size={16} />
+                    <History size={18} />
                   </Link>
                   <button
                     onClick={signOut}
-                    className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
-                             hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
                   >
-                    <LogOut size={16} />
+                    <LogOut size={18} />
                   </button>
                 </>
               ) : (
                 <button
                   onClick={() => setShowAuth(true)}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-red-500 text-white font-medium text-sm sm:text-base
-                           hover:bg-red-600 transition-colors"
+                  className="px-6 py-2 rounded-xl bg-tomato text-white font-bold text-sm hover:bg-tomato-deep shadow-lg shadow-tomato/20 transition-all active:scale-95"
                 >
                   登录 / 注册
                 </button>
@@ -353,67 +353,95 @@ function PomodoroApp() {
               />
               <button
                 onClick={() => setShowWidget(!showWidget)}
-                className={`p-1.5 sm:p-2 rounded-full transition-colors ${showWidget
-                  ? 'bg-red-100 text-red-600'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}
+                className={clsx(
+                  "p-2 rounded-xl transition-all",
+                  showWidget
+                    ? "bg-tomato text-white shadow-lg"
+                    : "bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg"
+                )}
               >
-                <Layers size={18} />
+                <Layers size={20} />
               </button>
               <button
                 onClick={() => setIsDark(!isDark)}
-                className="p-1.5 sm:p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400
-                         hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-xl bg-white dark:bg-gray-800 text-gray-400 hover:text-tomato hover:shadow-lg transition-all"
               >
-                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
               </button>
             </div>
           </header>
         )}
 
+        {isFocusMode && (
+          <div className="fixed top-8 right-8 z-50 animate-in fade-in duration-1000">
+            <button
+              onClick={() => setIsFocusMode(false)}
+              className="p-4 bg-white/10 hover:bg-white/20 dark:bg-gray-800/10 dark:hover:bg-gray-800/20 backdrop-blur-xl rounded-2xl text-gray-400 hover:text-tomato transition-all"
+            >
+              <Minimize2 size={24} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+
         <WebWidget isOpen={showWidget} onClose={() => setShowWidget(false)} />
-        <main className="space-y-12">
-          <section className={`bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-8 transition-all duration-500 ${isFocusMode ? 'scale-110 py-20' : ''}`}>
-            {/* Focus Mode Toggle Button */}
-            <div className="absolute top-4 right-4">
-              <button
-                onClick={() => setIsFocusMode(!isFocusMode)}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                title={isFocusMode ? "退出专注模式" : "进入专注模式"}
-              >
-                {isFocusMode ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-              </button>
-            </div>
-            <ModeSelector
-              currentMode={mode}
-              onModeChange={switchMode}
-              sessionsCompleted={completedSessions}
-              sessionsBeforeLongBreak={settings.sessionsBeforeLongBreak}
-              isRunning={isRunning}
-            />
-            <div className="mt-8">
-              <TimerDisplay
-                timeLeft={timeLeft}
+
+        <main className={clsx(
+          "flex flex-col items-center gap-12 transition-all duration-1000",
+          isFocusMode ? "justify-center min-h-[80vh]" : ""
+        )}>
+          <section className={clsx(
+            "relative w-full transition-all duration-1000 origin-center",
+            isFocusMode ? "scale-125 saturate-150" : "glass-card p-12 rounded-[40px] max-w-2xl"
+          )}>
+            {!isFocusMode && (
+              <div className="absolute top-6 right-6">
+                <button
+                  onClick={() => setIsFocusMode(true)}
+                  className="p-3 text-gray-300 hover:text-tomato hover:bg-tomato/5 rounded-xl transition-all"
+                  title="进入专注模式"
+                >
+                  <Maximize2 size={22} />
+                </button>
+              </div>
+            )}
+
+            <div className={clsx("transition-all duration-1000", isFocusMode ? "opacity-0 scale-75 pointer-events-none absolute w-full" : "mb-12")}>
+              <ModeSelector
+                currentMode={mode}
+                onModeChange={switchMode}
+                sessionsCompleted={completedSessions}
+                sessionsBeforeLongBreak={settings.sessionsBeforeLongBreak}
                 isRunning={isRunning}
-                mode={mode}
-                progress={progress()}
-                onToggle={toggle}
-                onReset={resetTimer}
-                activeTask={activeTask}
-                onAdjustTime={(delta) => {
-                  if (mode === 'focus') {
-                    setTimeLeft(prev => Math.max(60, Math.min(3600, prev + delta)))
-                  }
-                }}
               />
             </div>
+
+            <TimerDisplay
+              timeLeft={timeLeft}
+              isRunning={isRunning}
+              mode={mode}
+              progress={progress()}
+              onToggle={toggle}
+              onReset={resetTimer}
+              activeTask={activeTask}
+              onAdjustTime={(delta) => {
+                if (mode === 'focus') {
+                  setTimeLeft(prev => Math.max(60, Math.min(3600, prev + delta)))
+                }
+              }}
+            />
           </section>
 
           {!isFocusMode && (
-            <section>
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                任务列表
-              </h2>
+            <section className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                  今日计划
+                </h2>
+                <div className="h-0.5 flex-1 mx-6 bg-gray-100 dark:bg-gray-800 rounded-full" />
+                <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                  {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
+                </span>
+              </div>
               <TaskList
                 tasks={tasks}
                 onAddTask={handleAddTask}

@@ -57,7 +57,7 @@ export function SettingsPanel({
                   max="60"
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
                              bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                             focus:ring-2 focus:ring-red-500 outline-none"
+                             focus:ring-2 focus:ring-tomato outline-none"
                 />
               </div>
 
@@ -116,7 +116,7 @@ export function SettingsPanel({
                   </label>
                   <button
                     onClick={() => onSettingsChange({ sedentaryReminderEnabled: !settings.sedentaryReminderEnabled })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ring-offset-white dark:ring-offset-gray-800 ${settings.sedentaryReminderEnabled ? 'bg-red-500' : 'bg-gray-200 dark:bg-gray-700'
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ring-offset-white dark:ring-offset-gray-800 ${settings.sedentaryReminderEnabled ? 'bg-tomato' : 'bg-gray-200 dark:bg-gray-700'
                       }`}
                   >
                     <span
@@ -139,7 +139,7 @@ export function SettingsPanel({
                       max="240"
                       className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                 focus:ring-2 focus:ring-red-500 outline-none"
+                                 focus:ring-2 focus:ring-tomato outline-none"
                     />
                   </div>
                 )}
@@ -162,7 +162,7 @@ export function SettingsPanel({
                       onChange={e => onSettingsChange({ soundType: e.target.value as any })}
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600
                                  bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
-                                 outline-none focus:ring-2 focus:ring-red-500"
+                                 outline-none focus:ring-2 focus:ring-tomato"
                     >
                       <option value="bell">清脆铃声</option>
                       <option value="digital">电子音</option>
@@ -239,7 +239,7 @@ export function SettingsPanel({
                   </label>
                   <button
                     onClick={() => onSettingsChange({ hapticsEnabled: !settings.hapticsEnabled })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ring-offset-white dark:ring-offset-gray-800 ${settings.hapticsEnabled ? 'bg-purple-500' : 'bg-gray-200 dark:bg-gray-700'
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ring-2 ring-offset-2 ring-transparent ring-offset-white dark:ring-offset-gray-800 ${settings.hapticsEnabled ? 'bg-tomato' : 'bg-gray-200 dark:bg-gray-700'
                       }`}
                   >
                     <span
@@ -264,8 +264,8 @@ export function SettingsPanel({
               <div className="pt-2">
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-full py-3 px-4 rounded-xl bg-red-500 text-white font-bold
-                             hover:bg-red-600 shadow-lg shadow-red-500/20 transition-all
+                  className="w-full py-3 px-4 rounded-xl bg-tomato text-white font-bold
+                             hover:bg-tomato-deep shadow-lg shadow-tomato/20 transition-all
                              active:scale-95"
                 >
                   确认

@@ -94,25 +94,24 @@ export function TaskList({
         }
       }}
     >
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-3 mb-8 p-1.5 bg-gray-100/50 dark:bg-gray-800/50 rounded-2xl glass-card">
         <input
           type="text"
           value={newTaskTitle}
           onChange={e => setNewTaskTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="添加新任务..."
-          className="flex-1 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                     bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-red-500 outline-none"
+          placeholder="有什么新目标？ (例如: 读书 #3)"
+          className="flex-1 px-4 py-2 bg-transparent text-gray-900 dark:text-white
+                     placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none"
         />
         <button
           onClick={handleAddTask}
           disabled={!newTaskTitle.trim()}
-          className="px-4 py-2 rounded-lg bg-red-500 text-white font-medium
-                     hover:bg-red-600 disabled:bg-gray-300 dark:disabled:bg-gray-600
-                     transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-xl bg-tomato text-white font-medium
+                     hover:bg-tomato-deep disabled:bg-gray-300 dark:disabled:bg-gray-700
+                     shadow-sm hover:shadow-tomato/20 transition-all active:scale-95"
         >
-          <Plus size={20} />
+          <Plus size={20} strokeWidth={3} />
         </button>
       </div>
 
@@ -122,7 +121,7 @@ export function TaskList({
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              className="space-y-2"
+              className="space-y-3"
             >
               {tasks.map((task, index) => (
                 <TaskItem
@@ -147,38 +146,37 @@ export function TaskList({
       </DragDropContext>
 
       {tasks.length === 0 && (
-        <div className="text-center py-10">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30 flex items-center justify-center animate-pulse">
-                <Lightbulb size={40} className="text-yellow-500" />
+        <div className="text-center py-20 px-6 rounded-3xl bg-gray-50/50 dark:bg-gray-800/20 border-2 border-dashed border-gray-100 dark:border-gray-800">
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative group cursor-pointer" onClick={addExampleTask}>
+              <div className="w-24 h-24 rounded-full bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center transition-transform group-hover:scale-110 duration-500">
+                <div className="w-16 h-16 rounded-full bg-tomato/10 flex items-center justify-center text-tomato">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
+                    <path d="M12 6V2" />
+                    <path d="M16.24 7.76 19.07 4.93" />
+                  </svg>
+                </div>
               </div>
-              <div className="absolute -top-1 -right-1 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                1
+              <div className="absolute -bottom-2 -right-2 bg-tomato text-white px-3 py-1 rounded-full text-[10px] font-black tracking-tighter uppercase shadow-lg animate-bounce">
+                Relaxed
               </div>
             </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                开始你的专注之旅 🚀
+            <div className="space-y-3">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                “洋柿子” 正在放空...
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xs mx-auto">
-                洋柿子氛围帮你进入心流状态，每一次专注都是成长的积累。
+              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-[240px] mx-auto leading-relaxed">
+                还没开始任务吗？此时此刻，正是进入深度专注的最佳时机。
               </p>
             </div>
-            <div className="flex flex-col gap-2 mt-2">
-              <button
-                onClick={addExampleTask}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-red-500 to-red-600
-                           text-white font-medium hover:from-red-600 hover:to-red-700 transition-all
-                           shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <span>✨</span>
-                <span>添加示例：阅读 25 分钟</span>
-              </button>
-              <p className="text-xs text-gray-400">
-                或者直接在输入框中输入你的任务
-              </p>
-            </div>
+            <button
+              onClick={addExampleTask}
+              className="mt-2 text-sm font-semibold text-tomato hover:text-tomato-deep transition-colors flex items-center gap-2 group"
+            >
+              <Lightbulb size={16} className="group-hover:rotate-12 transition-transform" />
+              <span>试试：阅读 25 分钟</span>
+            </button>
           </div>
         </div>
       )}
