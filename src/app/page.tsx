@@ -28,6 +28,7 @@ const WelcomePopup = dynamic(() => import('@/components/WelcomePopup').then(mod 
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useTimer } from '@/contexts/TimerContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { Task } from '@/types'
 import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Maximize2, Minimize2 } from 'lucide-react'
 import Link from 'next/link'
@@ -37,6 +38,7 @@ import { saveSession } from '@/lib/supabase/sessions'
 
 
 function PomodoroApp() {
+  const { t } = useLanguage()
   const { user, loading: authLoading, signOut } = useAuth()
   const { settings, updateSettings, resetToDefaults } = usePomodoroSettings()
 
@@ -281,7 +283,7 @@ function PomodoroApp() {
         {!isFocusMode && (
           <header className="flex flex-wrap justify-between items-center gap-4 mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
             <h1 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3 tracking-tighter">
-              <span className="text-tomato drop-shadow-sm">🍅</span> 洋柿子氛围
+              <span className="text-tomato drop-shadow-sm">🍅</span> {t('brandName')}
             </h1>
             <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
               {user ? (
@@ -314,7 +316,7 @@ function PomodoroApp() {
                   onClick={() => setShowAuth(true)}
                   className="px-6 py-2 rounded-xl bg-tomato text-white font-bold text-sm hover:bg-tomato-deep shadow-lg shadow-tomato/20 transition-all active:scale-95"
                 >
-                  登录 / 注册
+                  {t('loginRegister')}
                 </button>
               )}
               <SettingsPanel
@@ -356,7 +358,7 @@ function PomodoroApp() {
                 <button
                   onClick={() => setIsFocusMode(true)}
                   className="p-3 text-gray-300 hover:text-tomato hover:bg-tomato/5 rounded-xl transition-all"
-                  title="进入专注模式"
+                  title={t('enterFocusMode')}
                 >
                   <Maximize2 size={22} />
                 </button>
@@ -396,11 +398,11 @@ function PomodoroApp() {
               <section className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                    今日计划
+                    {t('todaysPlan')}
                   </h2>
                   <div className="h-0.5 flex-1 mx-6 bg-gray-100 dark:bg-gray-800 rounded-full" />
                   <span className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                    {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'}
+                    {tasks.length} {tasks.length === 1 ? t('task') : t('tasks')}
                   </span>
                 </div>
                 <TaskList

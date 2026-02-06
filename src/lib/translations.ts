@@ -1,0 +1,232 @@
+export type Language = 'en' | 'zh';
+
+export const translations = {
+    en: {
+        // Common
+        confirm: "Confirm",
+        cancel: "Cancel",
+        close: "Close",
+        minutes: "mins",
+        less: "Less",
+        more: "More",
+
+        // Timer
+        start: "Start",
+        pause: "Pause",
+        resume: "Resume",
+        reset: "Reset",
+        focus: "Focus",
+        shortBreak: "Short Break",
+        longBreak: "Long Break",
+        currentTask: "Current Task",
+        focusing: "Focusing...",
+        shortBreakMsg: "Take a break",
+        longBreakMsg: "Deep relaxation",
+        pressSpaceToStart: "Press Space to Start",
+        stopAlarm: "Stop Alarm",
+        resetTimer: "Reset Timer",
+        switchModeConfirm: "Timer is running. Switching mode will reset progress. Continue?",
+
+        // Settings
+        settings: "Settings",
+        focusDuration: "Focus Duration (min)",
+        shortBreakDuration: "Short Break (min)",
+        longBreakDuration: "Long Break (min)",
+        sessionsBeforeLongBreak: "Sessions before Long Break",
+        enableSedentaryReminder: "Enable Sedentary Reminder",
+        reminderInterval: "Reminder Interval (min)",
+        soundSettings: "Sound Settings",
+        soundType: "Type",
+        volume: "Volume",
+        whiteNoise: "White Noise",
+        ambientSound: "Ambient Sound",
+        haptics: "Haptics (Vibration)",
+        resetToDefault: "Reset to Default",
+        language: "Language",
+
+        // Sound Types
+        sound_bell: "Bell",
+        sound_digital: "Digital",
+        sound_wood: "Wood",
+
+        // White Noise Types
+        noise_none: "Off",
+        noise_rain: "Rain",
+        noise_cafe: "Cafe",
+        noise_forest: "Forest",
+
+        // Welcome Popup
+        welcomeTitle: "Welcome to Tomato Vibe",
+        welcomeSubtitle: "Experience the ultimate focus journey with ritual.",
+        featureFocus: "Immersive Focus",
+        featureFocusDesc: "Based on Pomodoro Technique, supporting custom duration and full-screen mode.",
+        featureTasks: "Task Management",
+        featureTasksDesc: "Lightweight to-do list to keep goals clear and actionable.",
+        featureNoise: "White Noise",
+        featureNoiseDesc: "Curated ambient sounds like rain and cafe to block distractions.",
+        startJourney: "Start Journey",
+
+        // Tasks
+        addTask: "Add a task...",
+        noTasks: "No tasks yet, add one to start!",
+        pomodoros: "Pomodoros",
+        addTaskPlaceholder: "What is your next goal? (e.g. Reading #3)",
+        addExampleTask: "Read for 25 mins",
+        waitingForGoal: "Tomato Vibe is waiting for a goal...",
+        emptyStateDesc: "No tasks yet? Type a task and press Enter. Click on a task to start tracking time.",
+        tryExample: "Try: Read for 25 mins",
+        quickAddTip: "Tip: use \"Task Name #count\" for quick add",
+        relaxed: "Relaxed",
+        noEstimate: "No est",
+        est: "EST:",
+
+        // Sedentary
+        sedentaryTitle: "Time to Move!",
+        sedentaryMessage: "You've been sitting for a while. Take a quick stretch!",
+
+        // Auth
+        login: "Log In",
+        register: "Register",
+        logout: "Log Out",
+        email: "Email",
+        password: "Password",
+        authError: "Authentication Error",
+        googleLoginFailed: "Google Login Failed",
+        errorOccurred: "An error occurred",
+        welcomeBack: "Welcome Back",
+        startJourneyAuth: "Start Journey",
+        loginSubtitle: "Log in to sync your focus data",
+        registerSubtitle: "Create an account to start tracking",
+        registerNow: "Register Now",
+        or: "OR",
+        googleLogin: "Google Login",
+        noAccount: "No account yet?",
+        hasAccount: "Already have an account?",
+        clickToRegister: "Click to register",
+        goToLogin: "Log in",
+
+        // Metadata
+        appTitle: "Tomato Vibe - Pomodoro Timer",
+        appDesc: "A simple and beautiful Pomodoro application to help improve focus.",
+        brandName: "Tomato Vibe",
+        loginRegister: "Login / Register",
+        enterFocusMode: "Enter Focus Mode",
+        todaysPlan: "Today's Plan",
+        task: "Task",
+        tasks: "Tasks",
+    },
+    zh: {
+        // Common
+        confirm: "确认",
+        cancel: "取消",
+        close: "关闭",
+        minutes: "分钟",
+        less: "少",
+        more: "多",
+
+        // Timer
+        start: "开始",
+        pause: "暂停",
+        resume: "继续",
+        reset: "重置",
+        focus: "专注",
+        shortBreak: "短休息",
+        longBreak: "长休息",
+        currentTask: "当前任务",
+        focusing: "专注中...",
+        shortBreakMsg: "稍作休息",
+        longBreakMsg: "深度放松",
+        pressSpaceToStart: "按空格键开始",
+        stopAlarm: "停止闹铃",
+        resetTimer: "重置计时器",
+        switchModeConfirm: "正在计时中，切换模式将重置当前进度。确定要切换吗？",
+
+        // Settings
+        settings: "设置",
+        focusDuration: "专注时长（分钟）",
+        shortBreakDuration: "短休息时长（分钟）",
+        longBreakDuration: "长休息时长（分钟）",
+        sessionsBeforeLongBreak: "长休息前的专注次数",
+        enableSedentaryReminder: "开启久坐提醒",
+        reminderInterval: "提醒间隔（分钟）",
+        soundSettings: "提示音效",
+        soundType: "类型",
+        volume: "音量",
+        whiteNoise: "白噪音",
+        ambientSound: "环境音",
+        haptics: "触感反馈 (震动)",
+        resetToDefault: "恢复默认设置",
+        language: "语言",
+
+        // Sound Types
+        sound_bell: "清脆铃声",
+        sound_digital: "电子音",
+        sound_wood: "木鱼声",
+
+        // White Noise Types
+        noise_none: "关闭",
+        noise_rain: "雨声",
+        noise_cafe: "咖啡馆",
+        noise_forest: "森林",
+
+        // Welcome Popup
+        welcomeTitle: "欢迎使用 洋柿子氛围",
+        welcomeSubtitle: "打造极致的专注体验，让每一次番茄时间都充满仪式感",
+        featureFocus: "沉浸专注",
+        featureFocusDesc: "基于番茄工作法，支持自定义时长与沉浸式全屏模式",
+        featureTasks: "任务管理",
+        featureTasksDesc: "轻量级待办清单，让目标清晰可见，一触即发",
+        featureNoise: "白噪音陪伴",
+        featureNoiseDesc: "精选雨声、咖啡馆等环境音，隔绝干扰，快速入静",
+        startJourney: "开启专注之旅",
+
+        // Tasks
+        addTask: "添加一个任务...",
+        noTasks: "还没有任务，添加一个开始吧！",
+        pomodoros: "番茄钟",
+        addTaskPlaceholder: "有什么新目标？ (例如: 读书 #3)",
+        addExampleTask: "阅读 25 分钟",
+        waitingForGoal: "“洋柿子” 正在等待目标...",
+        emptyStateDesc: "还没开始任务吗？输入任务并按回车即可添加。点击任务标题，让“洋柿子”陪你一起达成它。",
+        tryExample: "试试：阅读 25 分钟",
+        quickAddTip: "支持 \"任务名称 #番茄数\" 快速设定目标",
+        relaxed: "Relaxed",
+        noEstimate: "无预估",
+        est: "预估:",
+
+        // Sedentary
+        sedentaryTitle: "该活动一下了！",
+        sedentaryMessage: "你已经坐了很长时间。起来伸展一下吧！",
+
+        // Auth
+        login: "登录",
+        register: "注册",
+        logout: "登出",
+        email: "邮箱",
+        password: "密码",
+        authError: "认证失败",
+        googleLoginFailed: "Google 登录失败",
+        errorOccurred: "发生错误",
+        welcomeBack: "欢迎回来",
+        startJourneyAuth: "开启旅程",
+        loginSubtitle: "登录以同步您的专注数据",
+        registerSubtitle: "创建一个账户以开始记录",
+        registerNow: "立即注册",
+        or: "或",
+        googleLogin: "Google 登录",
+        noAccount: "还没有账户？",
+        hasAccount: "已有账户？",
+        clickToRegister: "点击注册",
+        goToLogin: "去登录",
+
+        // Metadata
+        appTitle: "洋柿子氛围 - Pomodoro Timer",
+        appDesc: "一个简洁美观的洋柿子氛围应用，帮助你提高专注力",
+        brandName: "洋柿子氛围",
+        loginRegister: "登录 / 注册",
+        enterFocusMode: "进入专注模式",
+        todaysPlan: "今日计划",
+        task: "任务",
+        tasks: "任务",
+    }
+};

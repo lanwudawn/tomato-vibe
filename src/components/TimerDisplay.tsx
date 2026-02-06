@@ -4,6 +4,7 @@ import { Play, Pause, RotateCcw, Plus, Minus, BellOff } from 'lucide-react'
 import { clsx } from 'clsx'
 import { formatTime } from '@/hooks/usePomodoroTimer'
 import { useRef, useEffect, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface TimerDisplayProps {
   timeLeft: number
@@ -24,11 +25,7 @@ const modeColors = {
   longBreak: 'text-blue-500',
 }
 
-const modeLabels = {
-  focus: '专注中...',
-  shortBreak: '稍作休息',
-  longBreak: '深度放松',
-}
+
 
 export function TimerDisplay({
   timeLeft,
@@ -42,8 +39,15 @@ export function TimerDisplay({
   isAlarmPlaying,
   onStopAlarm,
 }: TimerDisplayProps) {
+  const { t } = useLanguage()
   const circleRef = useRef<SVGCircleElement>(null)
   const [circumference, setCircumference] = useState(0)
+
+  const modeLabels = {
+    focus: t('focusing'),
+    shortBreak: t('shortBreakMsg'),
+    longBreak: t('longBreakMsg'),
+  }
 
   useEffect(() => {
     if (circleRef.current) {
@@ -61,7 +65,7 @@ export function TimerDisplay({
       {activeTask && mode === 'focus' && (
         <div className="text-center animate-in fade-in slide-in-from-top-4 duration-700">
           <span className="text-xs uppercase tracking-widest text-gray-400 dark:text-gray-500 font-bold">
-            Current Task
+            {t('currentTask')}
           </span>
           <p className="text-xl font-semibold text-gray-800 dark:text-gray-100 mt-1">
             {activeTask.title}
@@ -105,7 +109,7 @@ export function TimerDisplay({
           </span>
           {!isRunning && !isAlarmPlaying && (
             <div className="absolute bottom-16 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 animate-pulse">
-              Press Space to Start
+              {t('pressSpaceToStart')}
             </div>
           )}
         </div>
@@ -116,7 +120,7 @@ export function TimerDisplay({
             className="absolute -bottom-4 animate-bounce bg-tomato text-white px-6 py-2 rounded-full font-bold shadow-xl shadow-tomato/40 flex items-center gap-2 hover:scale-110 transition-all z-20"
           >
             <BellOff size={18} />
-            停止闹铃
+            {t('stopAlarm')}
           </button>
         )}
       </div>
@@ -141,7 +145,7 @@ export function TimerDisplay({
                        bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400
                        hover:text-tomato dark:hover:text-tomato hover:bg-gray-50
                        shadow-md border border-gray-100 dark:border-gray-700 transition-all"
-            title="Reset Timer"
+            title={t('resetTimer')}
           >
             <RotateCcw size={24} />
           </button>

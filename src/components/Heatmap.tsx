@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 
 interface HeatmapProps {
@@ -8,6 +9,7 @@ interface HeatmapProps {
 }
 
 export function Heatmap({ data }: HeatmapProps) {
+    const { t } = useLanguage()
     const weeks = useMemo(() => {
         const today = new Date()
         const endDate = new Date(today)
@@ -60,20 +62,20 @@ export function Heatmap({ data }: HeatmapProps) {
                             <div
                                 key={day.date}
                                 className={`w-3 h-3 rounded-sm ${getColor(day.value)}`}
-                                title={`${day.date}: ${Math.round(day.value)} 分钟`}
+                                title={`${day.date}: ${Math.round(day.value)} ${t('minutes')}`}
                             />
                         ))}
                     </div>
                 ))}
             </div>
             <div className="flex justify-end items-center gap-2 mt-2 text-xs text-gray-400">
-                <span>Less</span>
+                <span>{t('less')}</span>
                 <div className="w-3 h-3 bg-gray-100 dark:bg-gray-800 rounded-sm" />
                 <div className="w-3 h-3 bg-red-200 dark:bg-red-900/40 rounded-sm" />
                 <div className="w-3 h-3 bg-red-300 dark:bg-red-800/60 rounded-sm" />
                 <div className="w-3 h-3 bg-red-400 dark:bg-red-700/80 rounded-sm" />
                 <div className="w-3 h-3 bg-red-500 dark:bg-red-600 rounded-sm" />
-                <span>More</span>
+                <span>{t('more')}</span>
             </div>
         </div>
     )

@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, ArrowRight, Loader2, AlertCircle, Sparkles } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface AuthFormProps {
   onSuccess?: () => void
 }
 
 export function AuthForm({ onSuccess }: AuthFormProps) {
+  const { t } = useLanguage()
   const [isLogin, setIsLogin] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,7 +25,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       setLoading(true)
       await signInWithGoogle()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Google 登录失败')
+      setError(err instanceof Error ? err.message : t('googleLoginFailed'))
       setLoading(false)
     }
   }
@@ -41,7 +43,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       }
       onSuccess?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : '发生错误')
+      setError(err instanceof Error ? err.message : t('errorOccurred'))
     } finally {
       setLoading(false)
     }
@@ -84,7 +86,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               animate={{ opacity: 1, y: 0 }}
               className="text-3xl font-bold text-gray-900 dark:text-white"
             >
-              {isLogin ? '欢迎回来' : '开启旅程'}
+              {isLogin ? t('welcomeBack') : t('startJourneyAuth')}
             </motion.h2>
             <motion.p
               key={isLogin ? "login-subtitle" : "register-subtitle"}
@@ -92,7 +94,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
               animate={{ opacity: 1 }}
               className="text-gray-500 dark:text-gray-400 mt-2 text-sm"
             >
-              {isLogin ? '登录以同步您的专注数据' : '创建一个账户以开始记录'}
+              {isLogin ? t('loginSubtitle') : t('registerSubtitle')}
             </motion.p>
           </motion.div>
 
@@ -100,7 +102,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
-                  邮箱
+                  {t('email')}
                 </label>
                 <div className="relative group">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tomato transition-colors" size={20} />
@@ -119,7 +121,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
-                  密码
+                  {t('password')}
                 </label>
                 <div className="relative group">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-tomato transition-colors" size={20} />
@@ -166,7 +168,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <>
-                  <span>{isLogin ? '登录' : '立即注册'}</span>
+                  <span>{isLogin ? t('login') : t('registerNow')}</span>
                   <ArrowRight size={20} />
                 </>
               )}
@@ -175,7 +177,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
 
           <div className="flex items-center gap-4 my-6">
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
-            <span className="text-sm text-gray-400">或</span>
+            <span className="text-sm text-gray-400">{t('or')}</span>
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
           </div>
 
@@ -206,17 +208,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                 fill="#EA4335"
               />
             </svg>
-            <span>Google 登录</span>
+            <span>{t('googleLogin')}</span>
           </button>
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {isLogin ? '还没有账户？' : '已有账户？'}
+              {isLogin ? t('noAccount') : t('hasAccount')}
               <button
                 onClick={toggleMode}
                 className="ml-2 font-semibold text-tomato hover:text-tomato-deep dark:hover:text-tomato transition-colors"
               >
-                {isLogin ? '点击注册' : '去登录'}
+                {isLogin ? t('clickToRegister') : t('goToLogin')}
               </button>
             </p>
           </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { X, Settings, Volume2, Music, Zap, Volume1 } from 'lucide-react'
+import { X, Settings, Volume2, Music, Zap, Volume1, Globe } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { PomodoroSettings } from '@/types'
 
 interface SettingsPanelProps {
@@ -14,6 +15,7 @@ export function SettingsPanel({
   onReset,
 }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const { t, language, setLanguage } = useLanguage()
 
   return (
     <>
@@ -35,7 +37,7 @@ export function SettingsPanel({
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">设置</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('settings')}</h2>
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -45,9 +47,36 @@ export function SettingsPanel({
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Language Settings */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                  <Globe size={16} />
+                  {t('language')}
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`flex-1 py-2 px-4 rounded-lg border ${language === 'en'
+                        ? 'bg-tomato text-white border-tomato'
+                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      } transition-colors`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => setLanguage('zh')}
+                    className={`flex-1 py-2 px-4 rounded-lg border ${language === 'zh'
+                        ? 'bg-tomato text-white border-tomato'
+                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      } transition-colors`}
+                  >
+                    中文
+                  </button>
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  专注时长（分钟）
+                  {t('focusDuration')}
                 </label>
                 <input
                   type="number"
@@ -63,7 +92,7 @@ export function SettingsPanel({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  短休息时长（分钟）
+                  {t('shortBreakDuration')}
                 </label>
                 <input
                   type="number"
@@ -79,7 +108,7 @@ export function SettingsPanel({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  长休息时长（分钟）
+                  {t('longBreakDuration')}
                 </label>
                 <input
                   type="number"
@@ -95,7 +124,7 @@ export function SettingsPanel({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  长休息前的专注次数
+                  {t('sessionsBeforeLongBreak')}
                 </label>
                 <input
                   type="number"
@@ -112,7 +141,7 @@ export function SettingsPanel({
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    开启久坐提醒
+                    {t('enableSedentaryReminder')}
                   </label>
                   <button
                     onClick={() => onSettingsChange({ sedentaryReminderEnabled: !settings.sedentaryReminderEnabled })}
@@ -129,7 +158,7 @@ export function SettingsPanel({
                 {settings.sedentaryReminderEnabled && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      提醒间隔（分钟）
+                      {t('reminderInterval')}
                     </label>
                     <input
                       type="number"
@@ -149,13 +178,13 @@ export function SettingsPanel({
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                   <Volume2 size={16} />
-                  提示音效
+                  {t('soundSettings')}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      类型
+                      {t('soundType')}
                     </label>
                     <select
                       value={settings.soundType}
@@ -164,14 +193,14 @@ export function SettingsPanel({
                                  bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
                                  outline-none focus:ring-2 focus:ring-tomato"
                     >
-                      <option value="bell">清脆铃声</option>
-                      <option value="digital">电子音</option>
-                      <option value="wood">木鱼声</option>
+                      <option value="bell">{t('sound_bell')}</option>
+                      <option value="digital">{t('sound_digital')}</option>
+                      <option value="wood">{t('sound_wood')}</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      音量 ({Math.round((settings.soundVolume || 0.5) * 100)}%)
+                      {t('volume')} ({Math.round((settings.soundVolume || 0.5) * 100)}%)
                     </label>
                     <input
                       type="range"
@@ -190,13 +219,13 @@ export function SettingsPanel({
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
                 <h3 className="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-2">
                   <Music size={16} />
-                  白噪音
+                  {t('whiteNoise')}
                 </h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      环境音
+                      {t('ambientSound')}
                     </label>
                     <select
                       value={settings.whiteNoiseType}
@@ -205,15 +234,15 @@ export function SettingsPanel({
                                  bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white
                                  outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="none">关闭</option>
-                      <option value="rain">雨声</option>
-                      <option value="cafe">咖啡馆</option>
+                      <option value="none">{t('noise_none')}</option>
+                      <option value="rain">{t('noise_rain')}</option>
+                      <option value="cafe">{t('noise_cafe')}</option>
                     </select>
                   </div>
                   {settings.whiteNoiseType !== 'none' && (
                     <div>
                       <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        音量 ({Math.round((settings.whiteNoiseVolume || 0.5) * 100)}%)
+                        {t('volume')} ({Math.round((settings.whiteNoiseVolume || 0.5) * 100)}%)
                       </label>
                       <input
                         type="range"
@@ -234,7 +263,7 @@ export function SettingsPanel({
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                     <Zap size={16} />
-                    触感反馈 (震动)
+                    {t('haptics')}
                   </label>
                   <button
                     onClick={() => onSettingsChange({ hapticsEnabled: !settings.hapticsEnabled })}
@@ -256,7 +285,7 @@ export function SettingsPanel({
                              text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700
                              transition-colors"
                 >
-                  恢复默认设置
+                  {t('resetToDefault')}
                 </button>
               </div>
 
@@ -267,7 +296,7 @@ export function SettingsPanel({
                              hover:bg-tomato-deep shadow-lg shadow-tomato/20 transition-all
                              active:scale-95"
                 >
-                  确认
+                  {t('confirm')}
                 </button>
               </div>
             </div>

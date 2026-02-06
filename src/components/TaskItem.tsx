@@ -5,6 +5,7 @@ import { Draggable } from '@hello-pangea/dnd'
 import { Check, Circle, GripVertical, Trash2 } from 'lucide-react'
 import { clsx } from 'clsx'
 import { Task } from '@/types'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface TaskItemProps {
     task: Task
@@ -31,8 +32,10 @@ export const TaskItem = memo(function TaskItem({
     onEditSave,
     onEditCancel,
     onEditStart,
+
     onUpdateEstimate,
 }: TaskItemProps) {
+    const { t } = useLanguage()
     const inputRef = useRef<HTMLInputElement>(null)
     const [localTitle, setLocalTitle] = useState(task.title)
 
@@ -130,7 +133,7 @@ export const TaskItem = memo(function TaskItem({
                             </span>
                             <div className="flex flex-wrap gap-1.5 min-h-[10px]">
                                 {pomodoroIcons.length > 0 ? pomodoroIcons : (
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-600 italic">No estimate</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-600 italic">{t('noEstimate')}</span>
                                 )}
                             </div>
                         </div>
@@ -139,7 +142,7 @@ export const TaskItem = memo(function TaskItem({
                     <div className="flex items-center gap-3">
                         {!isEditing && (
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-xs text-gray-400 font-mono">EST:</span>
+                                <span className="text-xs text-gray-400 font-mono">{t('est')}</span>
                                 <input
                                     type="number"
                                     min="0"

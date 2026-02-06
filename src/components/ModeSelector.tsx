@@ -1,6 +1,7 @@
 import { clsx } from 'clsx'
 import { PomodoroMode } from '@/types'
 import { Focus, Coffee, Battery } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface ModeSelectorProps {
   currentMode: PomodoroMode
@@ -17,10 +18,11 @@ export function ModeSelector({
   sessionsBeforeLongBreak,
   isRunning,
 }: ModeSelectorProps) {
+  const { t } = useLanguage()
   const modes: { id: PomodoroMode; label: string; icon: any }[] = [
-    { id: 'focus', label: '专注', icon: Focus },
-    { id: 'shortBreak', label: '短休', icon: Coffee },
-    { id: 'longBreak', label: '长休', icon: Battery },
+    { id: 'focus', label: t('focus'), icon: Focus },
+    { id: 'shortBreak', label: t('shortBreak'), icon: Coffee },
+    { id: 'longBreak', label: t('longBreak'), icon: Battery },
   ]
 
   const completedDots = Array.from({ length: sessionsBeforeLongBreak }).map((_, i) => (
@@ -43,7 +45,7 @@ export function ModeSelector({
     if (mode === currentMode) return
 
     if (isRunning) {
-      if (!confirm('正在计时中，切换模式将重置当前进度。确定要切换吗？')) {
+      if (!confirm(t('switchModeConfirm'))) {
         return
       }
     }

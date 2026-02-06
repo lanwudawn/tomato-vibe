@@ -4,7 +4,9 @@ import { useState, useCallback } from 'react'
 import { Plus, Lightbulb } from 'lucide-react'
 import { Task } from '@/types'
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd'
+
 import { TaskItem } from './TaskItem'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface TaskListProps {
   tasks: Task[]
@@ -27,6 +29,7 @@ export function TaskList({
   activeTaskId,
   onSelectTask,
 }: TaskListProps) {
+  const { t } = useLanguage()
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -82,7 +85,7 @@ export function TaskList({
   }
 
   const addExampleTask = () => {
-    onAddTask('阅读 25 分钟')
+    onAddTask(t('addExampleTask'))
   }
 
   return (
@@ -90,17 +93,18 @@ export function TaskList({
       className="w-full max-w-md mx-auto"
       onDoubleClick={(e) => {
         if (e.target === e.currentTarget) {
-          document.querySelector<HTMLInputElement>('input[placeholder="添加新任务..."]')?.focus()
+          document.getElementById('task-input')?.focus()
         }
       }}
     >
       <div className="flex gap-3 mb-8 p-1.5 bg-gray-100/50 dark:bg-gray-800/50 rounded-2xl glass-card">
         <input
+          id="task-input"
           type="text"
           value={newTaskTitle}
           onChange={e => setNewTaskTitle(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="有什么新目标？ (例如: 读书 #3)"
+          placeholder={t('addTaskPlaceholder')}
           className="flex-1 px-4 py-2 bg-transparent text-gray-900 dark:text-white
                      placeholder:text-gray-400 dark:placeholder:text-gray-500 outline-none"
         />
@@ -159,15 +163,15 @@ export function TaskList({
                 </div>
               </div>
               <div className="absolute -bottom-2 -right-2 bg-tomato text-white px-3 py-1 rounded-full text-[10px] font-black tracking-tighter uppercase shadow-lg animate-bounce">
-                Relaxed
+                {t('relaxed')}
               </div>
             </div>
             <div className="space-y-3">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                “洋柿子” 正在等待目标...
+                {t('waitingForGoal')}
               </h3>
               <p className="text-gray-500 dark:text-gray-400 text-sm max-w-[280px] mx-auto leading-relaxed">
-                还没开始任务吗？输入任务并按回车即可添加。点击任务标题，让“洋柿子”陪你一起达成它。
+                {t('emptyStateDesc')}
               </p>
             </div>
             <div className="flex flex-col items-center gap-2">
@@ -176,9 +180,9 @@ export function TaskList({
                 className="mt-2 text-sm font-semibold text-tomato hover:text-tomato-deep transition-colors flex items-center gap-2 group"
               >
                 <Lightbulb size={16} className="group-hover:rotate-12 transition-transform" />
-                <span>试试：阅读 25 分钟</span>
+                <span>{t('tryExample')}</span>
               </button>
-              <p className="text-[10px] text-gray-400 dark:text-gray-600 font-medium">支持 "任务名称 #番茄数" 快速设定目标</p>
+              <p className="text-[10px] text-gray-400 dark:text-gray-600 font-medium">{t('quickAddTip')}</p>
             </div>
           </div>
         </div>

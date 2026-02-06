@@ -1,8 +1,11 @@
 
 import { useState, useEffect } from 'react'
+
 import { X, Timer, CheckSquare, Music, BarChart2 } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export function WelcomePopup() {
+    const { t } = useLanguage()
     const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {
@@ -45,10 +48,10 @@ export function WelcomePopup() {
                             🍅
                         </div>
                         <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-2">
-                            欢迎使用 洋柿子氛围
+                            {t('welcomeTitle')}
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400">
-                            打造极致的专注体验，让每一次番茄时间都充满仪式感
+                            {t('welcomeSubtitle')}
                         </p>
                     </div>
 
@@ -58,9 +61,9 @@ export function WelcomePopup() {
                                 <Timer size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">沉浸专注</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">{t('featureFocus')}</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    基于番茄工作法，支持自定义时长与沉浸式全屏模式
+                                    {t('featureFocusDesc')}
                                 </p>
                             </div>
                         </div>
@@ -70,9 +73,9 @@ export function WelcomePopup() {
                                 <CheckSquare size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">任务管理</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">{t('featureTasks')}</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    轻量级待办清单，让目标清晰可见，一触即发
+                                    {t('featureTasksDesc')}
                                 </p>
                             </div>
                         </div>
@@ -82,9 +85,9 @@ export function WelcomePopup() {
                                 <Music size={24} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">白噪音陪伴</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-white mb-1">{t('featureNoise')}</h3>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    精选雨声、咖啡馆等环境音，隔绝干扰，快速入静
+                                    {t('featureNoiseDesc')}
                                 </p>
                             </div>
                         </div>
@@ -96,7 +99,7 @@ export function WelcomePopup() {
                        hover:bg-tomato-deep shadow-lg shadow-tomato/30 hover:shadow-tomato/40 
                        transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                     >
-                        开启专注之旅
+                        {t('startJourney')}
                     </button>
                 </div>
             </div>
