@@ -1,21 +1,37 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { usePomodoroTimer, usePomodoroSettings } from '@/hooks'
 import { TimerDisplay } from '@/components/TimerDisplay'
 import { ModeSelector } from '@/components/ModeSelector'
-import { SettingsPanel } from '@/components/SettingsPanel'
-import { TaskList } from '@/components/TaskList'
-import { AuthForm } from '@/components/AuthForm'
+
+// 动态载入非首屏核心组件，减少主包体积
+const SettingsPanel = dynamic(() => import('@/components/SettingsPanel').then(mod => mod.SettingsPanel), {
+  ssr: false,
+  loading: () => <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse" />
+})
+
+const TaskList = dynamic(() => import('@/components/TaskList').then(mod => mod.TaskList), {
+  ssr: false,
+  loading: () => <div className="h-40 rounded-3xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+})
+
+const AuthForm = dynamic(() => import('@/components/AuthForm').then(mod => mod.AuthForm), {
+  ssr: false
+})
+
+const WebWidget = dynamic(() => import('@/components/WebWidget').then(mod => mod.WebWidget), {
+  ssr: false
+})
+
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { Task } from '@/types'
-import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History } from 'lucide-react'
+import { Sun, Moon, LogOut, User as UserIcon, BarChart2, History, Layers } from 'lucide-react'
 import Link from 'next/link'
 import { getTasks, createTask as saveTaskToDB, updateTask as updateTaskInDB, deleteTask as deleteTaskFromDB } from '@/lib/supabase/tasks'
 import { saveSession } from '@/lib/supabase/sessions'
 import { broadcastTimerState, broadcastSessionComplete, getStoredUserId } from '@/lib/supabase/broadcast'
-import { WebWidget } from '@/components/WebWidget'
-import { Layers } from 'lucide-react'
 
 function PomodoroApp() {
   const { user, loading: authLoading, signOut } = useAuth()
@@ -57,8 +73,31 @@ function PomodoroApp() {
     taskId: activeTask?.id,
   })
 
+  const broadcastCache = useRef({
+    time: 0,
+    isRunning: false,
+    mode: '',
+    taskId: undefined as string | undefined
+  })
   useEffect(() => {
-    broadcastTimerState(mode, timeLeft, isRunning, activeTask, completedSessions)
+    const now = Date.now()
+    const stateChanged =
+      isRunning !== broadcastCache.current.isRunning ||
+      mode !== broadcastCache.current.mode ||
+      activeTask?.id !== broadcastCache.current.taskId
+
+    // 状态变更（运行中/停止/切换模式/切换任务）立即同步，否则每 10 秒同步一次时间
+    const shouldBroadcast = stateChanged || (now - broadcastCache.current.time > 10000)
+
+    if (shouldBroadcast) {
+      broadcastTimerState(mode, timeLeft, isRunning, activeTask, completedSessions)
+      broadcastCache.current = {
+        time: now,
+        isRunning,
+        mode,
+        taskId: activeTask?.id
+      }
+    }
   }, [mode, timeLeft, isRunning, activeTask, completedSessions])
 
   const loadTasks = useCallback(async () => {
@@ -98,6 +137,7 @@ function PomodoroApp() {
       completed: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      order: 0,
     }
     setTasks(prev => [tempTask, ...prev])
 
@@ -209,13 +249,9 @@ function PomodoroApp() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [toggle, resetTimer, mode, timeLeft, settings.focusDuration, setTimeLeft])
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">加载中...</div>
-      </div>
-    )
-  }
+  // 不再阻塞整个页面的渲染，authLoading 仅用于某些按钮的状态
+  // 保持核心计时器可以立即显示输出
+
 
   if (!user && showAuth) {
     return (
@@ -277,11 +313,10 @@ function PomodoroApp() {
             />
             <button
               onClick={() => setShowWidget(!showWidget)}
-              className={`p-1.5 sm:p-2 rounded-full transition-colors ${
-                showWidget 
-                  ? 'bg-red-100 text-red-600' 
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+              className={`p-1.5 sm:p-2 rounded-full transition-colors ${showWidget
+                ? 'bg-red-100 text-red-600'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
             >
               <Layers size={18} />
             </button>
