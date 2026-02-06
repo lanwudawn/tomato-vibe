@@ -57,3 +57,4 @@ export async function getTodaySessions(): Promise<number> {
 
   return (data || []).reduce((acc, session) => acc + session.duration / 60, 0)
 }
+

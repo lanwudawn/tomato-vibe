@@ -1,28 +1,26 @@
-import { createClient } from '@/lib/supabase/server'
+import { getHistorySessions } from '@/lib/supabase/server-sessions'
 import { redirect } from 'next/navigation'
 import { HistoryView } from '@/components/HistoryView'
 
-async function getRecentSessions() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+interface Props {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
 
-  if (!user) {
+async function getSessions(dateFilter?: string) {
+  const sessions = await getHistorySessions(dateFilter)
+
+  if (sessions === null) {
     redirect('/')
   }
 
-  const { data: sessions } = await supabase
-    .from('pomodoro_sessions')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('completed', true)
-    .order('started_at', { ascending: false })
-    .limit(50)
-
-  return sessions || []
+  return sessions
 }
 
-export default async function HistoryPage() {
-  const sessions = await getRecentSessions()
+export default async function HistoryPage(props: Props) {
+  const searchParams = await props.searchParams
+  const dateStr = typeof searchParams.date === 'string' ? searchParams.date : undefined
+
+  const sessions = await getSessions(dateStr)
 
   return <HistoryView sessions={sessions} />
 }

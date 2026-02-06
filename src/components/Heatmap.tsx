@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
-
+import { useRouter } from 'next/navigation'
 
 interface HeatmapProps {
     data: { date: string; value: number }[]
@@ -10,6 +10,8 @@ interface HeatmapProps {
 
 export function Heatmap({ data }: HeatmapProps) {
     const { t } = useLanguage()
+    const router = useRouter()
+
     const weeks = useMemo(() => {
         const today = new Date()
         const endDate = new Date(today)
@@ -46,22 +48,27 @@ export function Heatmap({ data }: HeatmapProps) {
     }, [data])
 
     const getColor = (value: number) => {
-        if (value === 0) return 'bg-gray-100 dark:bg-gray-800'
-        if (value < 30) return 'bg-red-200 dark:bg-red-900/40' // < 30 mins
-        if (value < 60) return 'bg-red-300 dark:bg-red-800/60' // < 1 hour
-        if (value < 120) return 'bg-red-400 dark:bg-red-700/80' // < 2 hours
-        return 'bg-red-500 dark:bg-red-600' // > 2 hours
+        if (value === 0) return 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+        if (value < 30) return 'bg-red-200 dark:bg-red-900/40 hover:bg-red-300 dark:hover:bg-red-900/60' // < 30 mins
+        if (value < 60) return 'bg-red-300 dark:bg-red-800/60 hover:bg-red-400 dark:hover:bg-red-800/80' // < 1 hour
+        if (value < 120) return 'bg-red-400 dark:bg-red-700/80 hover:bg-red-500 dark:hover:bg-red-700' // < 2 hours
+        return 'bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-500' // > 2 hours
+    }
+
+    const handleDayClick = (date: string) => {
+        router.push(`/history?date=${date}`)
     }
 
     return (
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto pb-2">
             <div className="flex gap-1 min-w-fit">
                 {weeks.map((week, wIndex) => (
                     <div key={wIndex} className="flex flex-col gap-1">
                         {week.map((day, dIndex) => (
                             <div
                                 key={day.date}
-                                className={`w-3 h-3 rounded-sm ${getColor(day.value)}`}
+                                onClick={() => handleDayClick(day.date)}
+                                className={`w-3 h-3 rounded-sm cursor-pointer transition-colors ${getColor(day.value)}`}
                                 title={`${day.date}: ${Math.round(day.value)} ${t('minutes')}`}
                             />
                         ))}
